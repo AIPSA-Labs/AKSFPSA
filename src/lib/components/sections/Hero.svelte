@@ -1,6 +1,8 @@
 <script>
     import Kerala from '../../assets/kerala.jpeg'
+	import Reveal from '../utils/shared/Reveal.svelte';
 </script>
+<Reveal>
 <section class="relative bg-background overflow-hidden">
 	<div class="max-w-7xl mx-auto px-6 lg:px-8 py-20 lg:py-28 relative z-10">
 
@@ -44,3 +46,4 @@
 		<div class="absolute inset-0 bg-primary/20 mix-blend-multiply"></div>
 	</div>
 </section>
+</Reveal>

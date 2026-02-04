@@ -9,7 +9,7 @@
 <svelte:head><link rel="icon" href={favicon} /></svelte:head>
 
 <TopBar/>
-<main>
+<main class="min-h-screen">
 {@render children()}
 </main>
 <Footer/>

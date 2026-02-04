@@ -1,3 +1,9 @@
+<script>
+	import Counter from "../utils/Home/Counter.svelte";
+	import Reveal from "../utils/shared/Reveal.svelte";
+
+</script>
+<Reveal>
 <section class=" border-y border-border">
 	<div class="max-w-7xl mx-auto px-6 lg:px-8 py-16">
 
@@ -5,7 +11,7 @@
 
 			<div>
 				<p class="text-4xl lg:text-5xl font-semibold text-primary tracking-tight">
-					1700+
+					<Counter value={1700} suffix="+" />
 				</p>
 				<p class="mt-3 text-sm uppercase tracking-wider text-text-muted">
 					Students
@@ -14,7 +20,7 @@
 
 			<div>
 				<p class="text-4xl lg:text-5xl font-semibold text-primary tracking-tight">
-					60+
+				<Counter value={60} suffix="+" />
 				</p>
 				<p class="mt-3 text-sm uppercase tracking-wider text-text-muted">
 					Courses
@@ -23,7 +29,7 @@
 
 			<div>
 				<p class="text-4xl lg:text-5xl font-semibold text-primary tracking-tight">
-					800+
+					<Counter value={800} suffix="+" />
 				</p>
 				<p class="mt-3 text-sm uppercase tracking-wider text-text-muted">
 					Certified Teachers
@@ -32,7 +38,7 @@
 
 			<div>
 				<p class="text-4xl lg:text-5xl font-semibold text-primary tracking-tight">
-					130+
+					<Counter value={130} suffix="+" />
 				</p>
 				<p class="mt-3 text-sm uppercase tracking-wider text-text-muted">
 					Awards
@@ -43,3 +49,4 @@
 
 	</div>
 </section>
+</Reveal>
