@@ -50,10 +50,11 @@
 
 		<div class="mt-12 relative border border-border rounded-lg overflow-hidden bg-surface">
 
+			<!-- svelte-ignore a11y_img_redundant_alt -->
 			<img
 				src={album.images[current]}
 				alt="Gallery Image"
-				class="w-full max-h-[600px] object-contain"
+				class="w-full max-h-150 object-contain"
 			/>
 
 			<button
