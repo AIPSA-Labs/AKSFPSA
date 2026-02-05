@@ -9,6 +9,36 @@
 	import Breadcrumbs from "$lib/components/shared/Breadcrumbs.svelte";
 
 	let { children } = $props();
+	const organizationSchema = {
+	"@context": "https://schema.org",
+	"@type": "Organization",
+	name: "All Kerala Self Financing Private Schools Association",
+	url: "https://yourdomain.com",
+	logo: "https://yourdomain.com/logo.png",
+	description:
+		"Statewide association representing private self-financing educational institutions across Kerala.",
+	address: {
+		"@type": "PostalAddress",
+		streetAddress: "123 Institutional Road",
+		addressLocality: "Ernakulam",
+		addressRegion: "Kerala",
+		postalCode: "682001",
+		addressCountry: "IN"
+	},
+	contactPoint: {
+		"@type": "ContactPoint",
+		telephone: "+91-9876543210",
+		contactType: "customer service",
+		areaServed: "IN",
+		availableLanguage: ["English", "Malayalam"]
+	},
+	sameAs: [
+		"https://facebook.com/yourpage",
+		"https://twitter.com/yourpage",
+		"https://instagram.com/yourpage"
+	]
+};
+
 
 	const siteName = "All Kerala Self Financing Private Schools Association";
 	const baseUrl = "https://yourdomain.com";
@@ -49,6 +79,9 @@ const breadcrumbSchema = derived(page, ($page) => {
 <svelte:head>
 	<title>{$meta.title}</title>
 	<meta name="description" content={$meta.description} />
+	<script type="application/ld+json">
+	{JSON.stringify(organizationSchema)}
+</script>
 
 	<meta property="og:title" content={$meta.title} />
 	<meta property="og:description" content={$meta.description} />

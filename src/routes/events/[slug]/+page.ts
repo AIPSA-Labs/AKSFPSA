@@ -53,5 +53,40 @@ export const load: PageLoad = ({ params }) => {
 		throw new Error("Event not found");
 	}
 
-	return { event };
+	const baseUrl = "https://yourdomain.com";
+
+	const schema = {
+		"@context": "https://schema.org",
+		"@type": "Event",
+		name: event.title,
+		startDate: "2026-03-15",
+		eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+		eventStatus: "https://schema.org/EventScheduled",
+		location: {
+			"@type": "Place",
+			name: event.location,
+			address: {
+				"@type": "PostalAddress",
+				addressLocality: event.location,
+				addressRegion: "Kerala",
+				addressCountry: "IN"
+			}
+		},
+		description: event.description,
+		organizer: {
+			"@type": "Organization",
+			name: "All Kerala Self Financing Private Schools Association",
+			url: baseUrl
+		}
+	};
+
+	return {
+		event,
+		meta: {
+			title: `${event.title} | AKSFPSA Events`,
+			description: event.description
+		},
+		schema
+	};
 };
+

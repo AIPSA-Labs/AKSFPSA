@@ -1,8 +1,13 @@
 <script lang="ts">
 	export let data;
-
-	const { course } = data;
+	const { course, schema } = data;
 </script>
+
+<svelte:head>
+	<script type="application/ld+json">
+		{JSON.stringify(schema)}
+	</script>
+</svelte:head>
 
 <section class="bg-background min-h-screen">
 	<div class="max-w-5xl mx-auto px-6 lg:px-8 py-20">
