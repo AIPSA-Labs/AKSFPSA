@@ -7,6 +7,7 @@
 	import { page } from '$app/stores';
 	import { derived } from 'svelte/store';
 	import Breadcrumbs from '$lib/components/shared/Breadcrumbs.svelte';
+	import { fade } from 'svelte/transition';
 
 	let { children } = $props();
 	const organizationSchema = {
@@ -101,7 +102,11 @@
 <TopBar />
 <Breadcrumbs />
 <main class="min-h-screen">
-	{@render children()}
+	{#key $page.url.pathname}
+		<div in:fade={{ duration: 500 }} >
+			{@render children()}
+		</div>
+	{/key}
 </main>
 
 <Footer />
