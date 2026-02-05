@@ -24,7 +24,7 @@
 			},
 			{
 				threshold: 0.2,
-				rootMargin: "0px 0px -80px 0px"
+				rootMargin: '0px 0px -80px 0px'
 			}
 		);
 
@@ -34,8 +34,7 @@
 
 <div bind:this={el}>
 	{#if visible}
-		<div
-			in:fly={{ y, duration, delay }}>
+		<div in:fly={{ y, duration, delay }}>
 			<slot />
 		</div>
 	{:else}

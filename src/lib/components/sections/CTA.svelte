@@ -7,48 +7,42 @@
 	};
 
 	const cta: CTA = {
-		title: "Become a Recognized Member Institution",
+		title: 'Become a Recognized Member Institution',
 		description:
-			"Join the statewide network of self-financing private schools and strengthen institutional representation, collaboration, and growth.",
-		primaryLink: "/membership",
-		secondaryLink: "/contact"
+			'Join the statewide network of self-financing private schools and strengthen institutional representation, collaboration, and growth.',
+		primaryLink: '/membership',
+		secondaryLink: '/contact'
 	};
 </script>
 
 <section class="bg-primary text-white">
-	<div class="max-w-7xl mx-auto px-6 lg:px-8 py-20">
-
-		<div class="grid lg:grid-cols-2 gap-12 items-center">
-
+	<div class="mx-auto max-w-7xl px-6 py-20 lg:px-8">
+		<div class="grid items-center gap-12 lg:grid-cols-2">
 			<div>
-				<h2 class="text-3xl lg:text-4xl font-semibold leading-tight">
+				<h2 class="text-3xl leading-tight font-semibold lg:text-4xl">
 					{cta.title}
 				</h2>
 
-				<p class="mt-6 text-white/80 leading-relaxed">
+				<p class="mt-6 leading-relaxed text-white/80">
 					{cta.description}
 				</p>
 			</div>
 
-			<div class="flex flex-col sm:flex-row gap-4 lg:justify-end">
-
+			<div class="flex flex-col gap-4 sm:flex-row lg:justify-end">
 				<a
 					href={cta.primaryLink}
-					class="inline-block bg-white text-primary px-8 py-3 rounded-md font-medium tracking-wide hover:bg-surface transition text-center"
+					class="inline-block rounded-md bg-white px-8 py-3 text-center font-medium tracking-wide text-primary transition hover:bg-surface"
 				>
 					Apply for Membership
 				</a>
 
 				<a
 					href={cta.secondaryLink}
-					class="inline-block border border-white text-white px-8 py-3 rounded-md font-medium tracking-wide hover:bg-white/10 transition text-center"
+					class="inline-block rounded-md border border-white px-8 py-3 text-center font-medium tracking-wide text-white transition hover:bg-white/10"
 				>
 					Contact Association
 				</a>
-
 			</div>
-
 		</div>
-
 	</div>
 </section>

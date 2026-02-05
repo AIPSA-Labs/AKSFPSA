@@ -8,18 +8,18 @@
 
 {#if open}
 	<!-- Overlay -->
-	<div
-		class="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
-		on:click={close}>
-	</div>
+
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<div class="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm" on:click={close}></div>
 
 	<!-- Side Panel -->
 	<aside
 		in:fly={{ x: -300 }}
 		out:fly={{ x: -300 }}
-		class="fixed top-0 left-0 h-full w-72 bg-background shadow-xl z-50 p-6">
-
-		<div class="flex justify-between items-center border-b border-border pb-4">
+		class="fixed top-0 left-0 z-50 h-full w-72 bg-background p-6 shadow-xl"
+	>
+		<div class="flex items-center justify-between border-b border-border pb-4">
 			<h2 class="font-semibold text-primary">Menu</h2>
 			<button on:click={close} class="text-xl text-primary">×</button>
 		</div>

@@ -1,6 +1,5 @@
-<script>	
-
-import { onMount } from 'svelte';
+<script>
+	import { onMount } from 'svelte';
 
 	export let value = 0;
 	export let suffix = '';

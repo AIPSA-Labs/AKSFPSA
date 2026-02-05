@@ -1,7 +1,7 @@
 <script>
 	import MobileMenu from './MobileMenu.svelte';
 	import NavLinks from './Navlink.svelte';
-  import Logo from '../../assets/logo.png'
+	import Logo from '../../assets/logo.png';
 
 	let mobileOpen = false;
 
@@ -16,20 +16,17 @@
 	}
 </script>
 
-<header class="bg-background border-b border-border sticky top-0 z-50">
-	<div class="max-w-7xl mx-auto px-4 lg:px-8">
-		<div class="flex items-center justify-between h-16">
-
+<header class="sticky top-0 z-50 border-b border-border bg-background">
+	<div class="mx-auto max-w-7xl px-4 lg:px-8">
+		<div class="flex h-16 items-center justify-between">
 			<!-- Logo -->
 			<div class="flex items-center gap-3">
-				<div class="w-10 h-10 rounded-full">
-          <img src={Logo} alt="Logo">
-        </div>
+				<div class="h-10 w-10 rounded-full">
+					<img src={Logo} alt="Logo" />
+				</div>
 				<div>
-					<h1 class="text-lg font-bold text-primary leading-tight">
-						AKSFPSA
-					</h1>
-					<p class="text-xs text-text-muted hidden sm:block">
+					<h1 class="text-lg leading-tight font-bold text-primary">AKSFPSA</h1>
+					<p class="hidden text-xs text-text-muted sm:block">
 						All Kerala Self Financing Private Schools Association
 					</p>
 				</div>
@@ -41,11 +38,7 @@
 			</div>
 
 			<!-- Mobile Toggle -->
-			<button
-				on:click={openMenu}
-				class="md:hidden text-primary text-2xl">
-				☰
-			</button>
+			<button on:click={openMenu} class="text-2xl text-primary md:hidden"> ☰ </button>
 		</div>
 	</div>
 </header>
