@@ -12,7 +12,7 @@
 
 	let form = $state<MemberInstitution>({ id: 0, name: '', district: '', category: 'Recognized', since: '' });
 
-	const districts = ['Kozhikode', 'Malappuram', 'Ernakulam', 'Thrissur', 'Kannur', 'Palakkad', 'Kollam'];
+	const districts = ['Alappuzha', 'Ernakulam', 'Idukki', 'Kannur', 'Kasaragod', 'Kollam', 'Kottayam', 'Kozhikode', 'Malappuram', 'Palakkad', 'Pathanamthitta', 'Thiruvananthapuram', 'Thrissur', 'Wayanad'];
 	let categories = $state(['Recognized', 'Associate']);
 
 	function save() {

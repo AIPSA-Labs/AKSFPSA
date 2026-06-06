@@ -8,6 +8,7 @@
 	let deleting = $state<BlogPost | null>(null);
 	let selected = $state<BlogPost | null>(null);
 	let statusFilter = $state<'all' | 'draft' | 'published'>('all');
+	let typeFilter = $state<'all' | 'post' | 'event'>('all');
 	let categories = $state<string[]>([]);
 	let showCatModal = $state(false);
 	let newCat = $state('');
@@ -25,7 +26,8 @@
 		items.filter((b) => {
 			const matchSearch = b.title.toLowerCase().includes(search.toLowerCase()) || b.tags.some((t) => t.toLowerCase().includes(search.toLowerCase()));
 			const matchStatus = statusFilter === 'all' || b.status === statusFilter;
-			return matchSearch && matchStatus;
+			const matchType = typeFilter === 'all' || b.type === typeFilter;
+			return matchSearch && matchStatus && matchType;
 		})
 	);
 
@@ -49,7 +51,7 @@
 
 <div class="flex flex-wrap items-center justify-between gap-4">
 	<div>
-		<h1 class="text-2xl font-bold text-primary">Blog Posts</h1>
+		<h1 class="text-2xl font-bold text-primary">Blog & Events</h1>
 		<p class="mt-0.5 text-sm text-text-muted">{items.length} total</p>
 	</div>
 	<div class="flex gap-2">
@@ -68,11 +70,18 @@
 	</select>
 </div>
 
+<div class="mt-3 flex flex-wrap gap-2">
+	<button onclick={() => typeFilter = 'all'} class="rounded-lg border px-3 py-1.5 text-xs font-medium transition {typeFilter === 'all' ? 'border-primary bg-primary text-white' : 'border-border bg-surface text-text hover:bg-background'}">All</button>
+	<button onclick={() => typeFilter = 'post'} class="rounded-lg border px-3 py-1.5 text-xs font-medium transition {typeFilter === 'post' ? 'border-primary bg-primary text-white' : 'border-border bg-surface text-text hover:bg-background'}">Posts</button>
+	<button onclick={() => typeFilter = 'event'} class="rounded-lg border px-3 py-1.5 text-xs font-medium transition {typeFilter === 'event' ? 'border-primary bg-primary text-white' : 'border-border bg-surface text-text hover:bg-background'}">Events</button>
+</div>
+
 <div class="mt-6 overflow-hidden rounded-xl border border-border">
 	<table class="w-full text-left text-sm">
 		<thead class="border-b border-border bg-surface">
 			<tr>
 				<th class="px-4 py-3 font-medium text-text-muted">Title</th>
+				<th class="hidden px-4 py-3 font-medium text-text-muted md:table-cell">Type</th>
 				<th class="hidden px-4 py-3 font-medium text-text-muted md:table-cell">Status</th>
 				<th class="hidden px-4 py-3 font-medium text-text-muted sm:table-cell">Date</th>
 				<th class="hidden px-4 py-3 font-medium text-text-muted sm:table-cell">Tags</th>
@@ -83,6 +92,11 @@
 			{#each filtered as item}
 				<tr class="cursor-pointer border-b border-border last:border-0 hover:bg-surface/50 max-sm:transition-colors" onclick={() => selected = item}>
 					<td class="px-4 py-3 font-medium text-text">{item.title}</td>
+					<td class="hidden px-4 py-3 md:table-cell">
+						<span class="rounded-md px-2 py-0.5 text-xs font-medium {item.type === 'event' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'}">
+							{item.type === 'event' ? 'Event' : 'Post'}
+						</span>
+					</td>
 					<td class="hidden px-4 py-3 md:table-cell">
 						<button onclick={(e) => { e.stopPropagation(); toggleStatus(item); }}
 							class="rounded-md px-2 py-0.5 text-xs font-medium {item.status === 'published' ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-amber-100 text-amber-700 hover:bg-amber-200'}">
@@ -104,7 +118,7 @@
 				</tr>
 			{/each}
 			{#if filtered.length === 0}
-				<tr><td colspan="4" class="px-4 py-8 text-center text-text-muted">No posts found</td></tr>
+				<tr><td colspan="5" class="px-4 py-8 text-center text-text-muted">No posts found</td></tr>
 			{/if}
 		</tbody>
 	</table>
@@ -163,6 +177,9 @@
 				<h3 class="text-lg font-semibold text-text leading-snug">{selected.title}</h3>
 
 				<div class="flex flex-wrap items-center gap-3 text-sm">
+					<span class="rounded-md px-2.5 py-0.5 text-xs font-medium {selected.type === 'event' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'}">
+						{selected.type === 'event' ? 'Event' : 'Post'}
+					</span>
 					<button onclick={(e) => { e.stopPropagation(); toggleStatus(selected); }}
 						class="rounded-md px-2.5 py-0.5 text-xs font-medium {selected.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}">
 						{selected.status}

@@ -4,7 +4,7 @@
 	import type { BlogPost } from '$lib/stores/data';
 
 	const posts: BlogPost[] = getStore('blog_posts', DEFAULT_BLOG_POSTS)
-		.filter((p) => p.status === 'published')
+		.filter((p) => p.status === 'published' && p.type === 'post')
 		.sort((a, b) => {
 			const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 			const da = a.date.split(' ');

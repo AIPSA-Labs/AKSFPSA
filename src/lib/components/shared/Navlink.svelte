@@ -6,6 +6,7 @@
 	class="flex flex-col gap-6 text-sm font-medium md:flex-row md:items-center md:justify-center md:gap-8"
 >
 	<a href="/about" on:click={onNavigate}>About</a>
+	<a href="/services" on:click={onNavigate}>Services</a>
 	<a href="/members" on:click={onNavigate}>Members</a>
 	<a href="/circulars" on:click={onNavigate}>Circulars</a>
 	<a href="/events" on:click={onNavigate}>Events</a>

@@ -46,12 +46,21 @@ export type Event = {
 	description: string;
 };
 
-export type Album = {
+export type GalleryImage = {
+	id: number;
+	src: string;
+	alt: string;
+};
+
+export type GalleryAlbum = {
+	id: number;
 	slug: string;
 	title: string;
 	date: string;
+	category: string;
 	cover: string;
 	description: string;
+	images: GalleryImage[];
 };
 
 export type Leader = {
@@ -76,6 +85,34 @@ export type MembershipPlan = {
 	description: string;
 	features: string[];
 };
+
+export type Service = {
+	id: number;
+	title: string;
+	description: string;
+	icon: string;
+	order: number;
+};
+
+export const DEFAULT_SERVICES: Service[] = [
+	{ id: 1, title: 'Coaching', description: 'AKSFPSA is your gateway to a successful future in Teaching Career. Start today to learn more.', icon: 'GraduationCap', order: 1 },
+	{ id: 2, title: 'Smart School', description: 'The smart school is a project provided to improve quality of education through QIP (Quality Improvement Programme) for sustainable development.', icon: 'Monitor', order: 2 },
+	{ id: 3, title: 'Courses', description: 'There are many courses for teachers and students. Teachers can join Cambridge Certified English Course, PG Certificate Program in digital education and more.', icon: 'BookOpen', order: 3 },
+	{ id: 4, title: 'Digital Schooling', description: 'Digital India schooling program for beginners and schools. Free service of our Digital India schooling program.', icon: 'Globe', order: 4 },
+	{ id: 5, title: 'Madrasa CBSE Rural Education Scheme', description: 'Special scheme integrating Madrasa education with CBSE curriculum for rural areas.', icon: 'School', order: 5 },
+	{ id: 6, title: 'Scholarship Examination', description: 'Annual scholarship examination for school students to identify and nurture talent.', icon: 'Award', order: 6 }
+];
+
+export type UploadedFile = {
+	id: number;
+	name: string;
+	type: string;
+	size: number;
+	data: string;
+	date: string;
+};
+
+export const DEFAULT_FILES: UploadedFile[] = [];
 
 export type FAQ = {
 	question: string;
@@ -110,6 +147,7 @@ export type BlogPost = {
 	status: 'draft' | 'published';
 	cover: string;
 	tags: string[];
+	type: 'post' | 'event';
 };
 
 export const DEFAULT_CIRCULARS: Circular[] = [
@@ -132,20 +170,34 @@ export const DEFAULT_EVENTS: Event[] = [
 	{ slug: 'teacher-certification-workshop', title: 'Teacher Certification Workshop', date: '20 January 2026', location: 'Thrissur', type: 'Workshop', description: 'Professional development workshop for faculty members.' }
 ];
 
-export const DEFAULT_ALBUMS: Album[] = [
-	{ slug: 'conference-2026', title: 'State-Level Educational Leadership Conference 2026', date: 'January 2026', cover: '/images/gallery/conference-cover.jpg', description: 'Statewide leadership conference focusing on institutional governance and policy alignment.' },
-	{ slug: 'district-meet-malappuram', title: 'District Coordinators Meeting – Malappuram', date: 'December 2025', cover: '/images/gallery/malappuram-cover.jpg', description: 'District-level administrative coordination and membership engagement session.' },
-	{ slug: 'teacher-certification-2025', title: 'Teacher Certification Program 2025', date: 'November 2025', cover: '/images/gallery/certification-cover.jpg', description: 'Professional development initiative conducted for faculty members across member institutions.' }
+export const DEFAULT_GALLERY_CATEGORIES: string[] = ['Conference', 'Meeting', 'Workshop'];
+
+export const DEFAULT_ALBUMS: GalleryAlbum[] = [
+	{ id: 1, slug: 'conference-2026', title: 'State-Level Educational Leadership Conference 2026', date: 'January 2026', category: 'Conference', cover: '/images/gallery/conference-cover.jpg', description: 'Statewide leadership conference focusing on institutional governance and policy alignment.', images: [
+		{ id: 1, src: '/images/gallery/conference/1.jpg', alt: 'Conference keynote session' },
+		{ id: 2, src: '/images/gallery/conference/2.jpg', alt: 'Panel discussion' },
+		{ id: 3, src: '/images/gallery/conference/3.jpg', alt: 'Group photo' },
+		{ id: 4, src: '/images/gallery/conference/4.jpg', alt: 'Networking session' }
+	]},
+	{ id: 2, slug: 'district-meet-malappuram', title: 'District Coordinators Meeting – Malappuram', date: 'December 2025', category: 'Meeting', cover: '/images/gallery/malappuram-cover.jpg', description: 'District-level administrative coordination and membership engagement session.', images: [
+		{ id: 1, src: '/images/gallery/malappuram/1.jpg', alt: 'Meeting opening' },
+		{ id: 2, src: '/images/gallery/malappuram/2.jpg', alt: 'District representatives' },
+		{ id: 3, src: '/images/gallery/malappuram/3.jpg', alt: 'Closing remarks' }
+	]},
+	{ id: 3, slug: 'teacher-certification-2025', title: 'Teacher Certification Program 2025', date: 'November 2025', category: 'Workshop', cover: '/images/gallery/certification-cover.jpg', description: 'Professional development initiative conducted for faculty members across member institutions.', images: [
+		{ id: 1, src: '/images/gallery/certification/1.jpg', alt: 'Workshop session' },
+		{ id: 2, src: '/images/gallery/certification/2.jpg', alt: 'Participants' }
+	]}
 ];
 
 export const DEFAULT_LEADERS: Leader[] = [
-	{ name: 'Mr. John Mathew', role: 'President', district: 'Kozhikode', image: '/images/president.jpg', group: 'office-bearers' },
-	{ name: 'Mrs. Anjali Nair', role: 'General Secretary', district: 'Malappuram', image: '/images/secretary.jpg', group: 'office-bearers' },
-	{ name: 'Mr. Rahim Khan', role: 'Treasurer', district: 'Ernakulam', image: '/images/treasurer.jpg', group: 'office-bearers' },
-	{ name: 'Mr. Suresh Kumar', role: 'Joint Secretary', district: 'Thrissur', image: '/images/member1.jpg', group: 'executive-members' },
-	{ name: 'Mrs. Deepa Menon', role: 'Executive Member', district: 'Kannur', image: '/images/member2.jpg', group: 'executive-members' },
-	{ name: 'Mr. Faisal Ahmed', role: 'Executive Member', district: 'Palakkad', image: '/images/member3.jpg', group: 'executive-members' },
-	{ name: 'Mrs. Lakshmi Pillai', role: 'Executive Member', district: 'Kollam', image: '/images/member4.jpg', group: 'executive-members' }
+	{ name: 'Mr. John Mathew', role: 'President', district: 'Kozhikode', image: '', group: 'office-bearers' },
+	{ name: 'Mrs. Anjali Nair', role: 'General Secretary', district: 'Malappuram', image: '', group: 'office-bearers' },
+	{ name: 'Mr. Rahim Khan', role: 'Treasurer', district: 'Ernakulam', image: '', group: 'office-bearers' },
+	{ name: 'Mr. Suresh Kumar', role: 'Joint Secretary', district: 'Thrissur', image: '', group: 'executive-members' },
+	{ name: 'Mrs. Deepa Menon', role: 'Executive Member', district: 'Kannur', image: '', group: 'executive-members' },
+	{ name: 'Mr. Faisal Ahmed', role: 'Executive Member', district: 'Palakkad', image: '', group: 'executive-members' },
+	{ name: 'Mrs. Lakshmi Pillai', role: 'Executive Member', district: 'Kollam', image: '', group: 'executive-members' }
 ];
 
 export const DEFAULT_MEMBERS: MemberInstitution[] = [
@@ -171,18 +223,6 @@ export const DEFAULT_FAQS: FAQ[] = [
 export const DEFAULT_BLOG_POSTS: BlogPost[] = [
 	{
 		id: 1,
-		title: 'Annual Leadership Conference 2026 – Key Takeaways',
-		slug: 'annual-leadership-conference-2026',
-		excerpt: 'Highlights and outcomes from the statewide educational leadership conference held in Ernakulam.',
-		content: '<h2>A Successful Gathering</h2><p>The Annual Educational Leadership Meet 2026 brought together over 200 representatives from member institutions across all 14 districts of Kerala.</p><p>Key discussions focused on governance reform, digital transformation in school administration, and collaborative frameworks for institutional growth.</p><h3>Major Announcements</h3><ul><li>Launch of the Teacher Certification Program 2.0</li><li>New financial partnership models for member schools</li><li>District-level working groups for policy advocacy</li></ul><p>We look forward to building on this momentum throughout the year.</p>',
-		author: 'AKSFPSA Office',
-		date: '20 March 2026',
-		status: 'published',
-		cover: '',
-		tags: ['Conference', 'Leadership', 'Governance']
-	},
-	{
-		id: 2,
 		title: 'Teacher Certification Program – Applications Now Open',
 		slug: 'teacher-certification-program-open',
 		excerpt: 'Applications are now being accepted for the 2026 batch of the Teacher Certification Program.',
@@ -191,7 +231,34 @@ export const DEFAULT_BLOG_POSTS: BlogPost[] = [
 		date: '5 February 2026',
 		status: 'published',
 		cover: '',
-		tags: ['Training', 'Certification', 'Teachers']
+		tags: ['Training', 'Certification', 'Teachers'],
+		type: 'post'
+	},
+	{
+		id: 2,
+		title: 'Annual Educational Leadership Meet 2026',
+		slug: 'annual-leadership-meet-2026',
+		excerpt: 'Statewide conference focusing on governance alignment and institutional development.',
+		content: '<h2>A Successful Gathering</h2><p>The Annual Educational Leadership Meet 2026 brought together over 200 representatives from member institutions across all 14 districts of Kerala.</p><p>Key discussions focused on governance reform, digital transformation in school administration, and collaborative frameworks for institutional growth.</p><h3>Major Announcements</h3><ul><li>Launch of the Teacher Certification Program 2.0</li><li>New financial partnership models for member schools</li><li>District-level working groups for policy advocacy</li></ul><p>The annual leadership meet brings together school administrators and institutional representatives to discuss regulatory alignment, growth strategy, and collaborative initiatives for the upcoming academic year.</p>',
+		author: 'AKSFPSA Office',
+		date: '15 March 2026',
+		status: 'published',
+		cover: '',
+		tags: ['Conference', 'Leadership', 'Governance'],
+		type: 'event'
+	},
+	{
+		id: 3,
+		title: 'District Coordinators Meeting',
+		slug: 'district-coordinators-meet',
+		excerpt: 'District-level review meeting for member institutions.',
+		content: '<p>This coordination meeting ensures alignment of district representatives with statewide policies and membership development strategies. All district coordinators are requested to attend.</p><h3>Agenda</h3><ul><li>Review of membership targets</li><li>Upcoming training programs</li><li>Feedback from member institutions</li><li>Planning for the next quarter</li></ul>',
+		author: 'AKSFPSA Office',
+		date: '10 February 2026',
+		status: 'published',
+		cover: '',
+		tags: ['Meeting', 'Coordination'],
+		type: 'event'
 	}
 ];
 

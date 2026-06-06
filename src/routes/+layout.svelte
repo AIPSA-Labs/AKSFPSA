@@ -9,6 +9,7 @@
 	import Breadcrumbs from '$lib/components/shared/Breadcrumbs.svelte';
 	import { fade } from 'svelte/transition';
 	import { getStoredTheme } from '$lib/stores/theme';
+	import { trackView } from '$lib/stores/analytics';
 
 	let { children } = $props();
 
@@ -84,6 +85,16 @@
 			'@type': 'BreadcrumbList',
 			itemListElement: items
 		};
+	});
+
+	let prevPath = '';
+
+	$effect(() => {
+		const path = $page.url.pathname;
+		if (path !== prevPath) {
+			prevPath = path;
+			trackView(path);
+		}
 	});
 </script>
 

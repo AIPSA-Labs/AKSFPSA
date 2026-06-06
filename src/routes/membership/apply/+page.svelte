@@ -12,6 +12,8 @@
 
 	let step = 1;
 
+	const districts = ['Alappuzha', 'Ernakulam', 'Idukki', 'Kannur', 'Kasaragod', 'Kollam', 'Kottayam', 'Kozhikode', 'Malappuram', 'Palakkad', 'Pathanamthitta', 'Thiruvananthapuram', 'Thrissur', 'Wayanad'];
+
 	const steps = [
 		"Institution Details",
 		"Contact Information",
@@ -92,12 +94,15 @@
 						bind:value={form.registrationNumber}
 					/>
 
-					<input
-						type="text"
-						placeholder="District"
+					<select
 						class="w-full border border-border rounded-md px-4 py-3 bg-background"
 						bind:value={form.district}
-					/>
+					>
+						<option value="">Select District</option>
+						{#each districts as d}
+							<option value={d}>{d}</option>
+						{/each}
+					</select>
 
 					<textarea
 						placeholder="Institution Address"

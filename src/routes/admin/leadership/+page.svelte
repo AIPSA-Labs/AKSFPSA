@@ -12,6 +12,7 @@
 	let form = $state<Leader>({ name: '', role: '', district: '', image: '', group: 'office-bearers' });
 
 	let roles = $state(['President', 'General Secretary', 'Treasurer', 'Joint Secretary', 'Executive Member']);
+	const districts = ['Alappuzha', 'Ernakulam', 'Idukki', 'Kannur', 'Kasaragod', 'Kollam', 'Kottayam', 'Kozhikode', 'Malappuram', 'Palakkad', 'Pathanamthitta', 'Thiruvananthapuram', 'Thrissur', 'Wayanad'];
 	const groups = [
 		{ value: 'office-bearers', label: 'Office Bearers' },
 		{ value: 'executive-members', label: 'Executive Members' }
@@ -165,7 +166,12 @@
 				<div class="grid grid-cols-2 gap-4">
 					<div>
 						<label class="mb-1 block text-sm font-medium text-text">District</label>
-						<input type="text" bind:value={form.district} class="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary" />
+						<select bind:value={form.district} class="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary">
+							<option value="">Select</option>
+							{#each districts as d}
+								<option value={d}>{d}</option>
+							{/each}
+						</select>
 					</div>
 					<div>
 						<label class="mb-1 block text-sm font-medium text-text">Group</label>
@@ -177,8 +183,20 @@
 					</div>
 				</div>
 				<div>
-					<label class="mb-1 block text-sm font-medium text-text">Image Path</label>
-					<input type="text" bind:value={form.image} placeholder="/images/president.jpg" class="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary" />
+					<label class="mb-1 block text-sm font-medium text-text">Image</label>
+					<input type="file" accept="image/*" onchange={(e) => {
+						const file = (e.target as HTMLInputElement).files?.[0];
+						if (file) {
+							const reader = new FileReader();
+							reader.onload = () => { form.image = reader.result as string; };
+							reader.readAsDataURL(file);
+						}
+					}} class="w-full text-sm text-text-muted file:mr-3 file:rounded-lg file:border-0 file:bg-primary file:px-3 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-primary-hover" />
+					{#if form.image}
+						<div class="mt-2 h-20 w-20 overflow-hidden rounded-lg border border-border bg-background">
+							<img src={form.image} alt="Preview" class="h-full w-full object-cover" />
+						</div>
+					{/if}
 				</div>
 			</div>
 			<div class="mt-6 flex justify-end gap-3">
@@ -217,7 +235,9 @@
 				</div>
 				<p class="text-sm text-text-muted">{selected.group === 'office-bearers' ? 'Office Bearers' : 'Executive Members'}</p>
 				{#if selected.image}
-					<p class="text-sm text-text-muted">Image: {selected.image}</p>
+					<div class="h-24 w-24 overflow-hidden rounded-lg border border-border bg-background">
+						<img src={selected.image} alt={selected.name} class="h-full w-full object-cover" />
+					</div>
 				{/if}
 			</div>
 			<div class="grid grid-cols-2 gap-2 border-t border-border px-5 py-4">

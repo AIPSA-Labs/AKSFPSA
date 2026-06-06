@@ -28,7 +28,8 @@
 	let form = $state({
 		title: '', excerpt: '', author: 'AKSFPSA Office',
 		cover: '', content: '', tags: [] as string[],
-		status: 'draft' as 'draft' | 'published'
+		status: 'draft' as 'draft' | 'published',
+		type: 'post' as 'post' | 'event'
 	});
 
 	let editingSlug = $state<string | null>(null);
@@ -217,6 +218,26 @@
 	<!-- Step 4: Tags & Settings -->
 	{:else if step === 4}
 		<div class="space-y-6">
+			<div>
+				<label class="mb-1.5 block text-sm font-medium text-text">Post Type</label>
+				<div class="flex gap-3">
+					<label class="flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-3 {form.type === 'post' ? 'border-primary bg-primary/5' : 'border-border'}">
+						<input type="radio" name="type" value="post" bind:group={form.type} class="text-primary" />
+						<div>
+							<span class="text-sm font-medium text-text">Post</span>
+							<p class="text-xs text-text-muted">Appears on the Blog page</p>
+						</div>
+					</label>
+					<label class="flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-3 {form.type === 'event' ? 'border-primary bg-primary/5' : 'border-border'}">
+						<input type="radio" name="type" value="event" bind:group={form.type} class="text-primary" />
+						<div>
+							<span class="text-sm font-medium text-text">Event</span>
+							<p class="text-xs text-text-muted">Appears on the Events page</p>
+						</div>
+					</label>
+				</div>
+			</div>
+
 			<div>
 				<label class="mb-1.5 block text-sm font-medium text-text">Status</label>
 				<div class="flex gap-3">

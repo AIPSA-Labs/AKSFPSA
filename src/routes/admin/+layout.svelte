@@ -3,9 +3,9 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import {
-		LayoutDashboard, FileText, BookOpen, Calendar, Feather,
-		Images, Users, Building2, CreditCard, Phone,
-		Menu, User, Sun, Moon
+		LayoutDashboard, FileText, BookOpen, Feather,
+		Images, Users, Building2, HelpCircle, Phone,
+		Menu, User, Sun, Moon, FolderOpen, Gem
 	} from '@lucide/svelte';
 	import { getStoredTheme, setTheme } from '$lib/stores/theme';
 
@@ -34,12 +34,13 @@
 		{ href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
 		{ href: '/admin/circulars', label: 'Circulars', icon: FileText },
 		{ href: '/admin/courses', label: 'Courses', icon: BookOpen },
-		{ href: '/admin/events', label: 'Events', icon: Calendar },
-		{ href: '/admin/blog', label: 'Blog', icon: Feather },
+		{ href: '/admin/blog', label: 'Blog & Events', icon: Feather },
 		{ href: '/admin/gallery', label: 'Gallery', icon: Images },
+		{ href: '/admin/services', label: 'Services', icon: Gem },
+		{ href: '/admin/files', label: 'Files', icon: FolderOpen },
 		{ href: '/admin/leadership', label: 'Leadership', icon: Users },
 		{ href: '/admin/members', label: 'Members', icon: Building2 },
-		{ href: '/admin/membership', label: 'Membership', icon: CreditCard },
+		{ href: '/admin/faq', label: 'FAQ', icon: HelpCircle },
 		{ href: '/admin/contact', label: 'Contact', icon: Phone }
 	];
 
@@ -60,13 +61,6 @@
 			<span class="text-base font-semibold tracking-tight">AKSFPSA Admin</span>
 		</div>
 		<div class="flex items-center gap-2">
-			<button onclick={toggleAppTheme} class="rounded-md bg-white/15 p-1.5 transition hover:bg-white/25">
-				{#if theme === 'dark'}
-					<Sun size={16} />
-				{:else}
-					<Moon size={16} />
-				{/if}
-			</button>
 			<a href="/admin/profile" class="flex items-center gap-1.5 rounded-md bg-white/15 px-3 py-1.5 text-sm font-medium transition hover:bg-white/25">
 				<User size={14} /> Profile
 			</a>
@@ -95,6 +89,16 @@
 					{item.label}
 				</a>
 			{/each}
+			<div class="mt-auto border-t border-border pt-3">
+				<button onclick={() => { toggleAppTheme(); closeSidebar(); }} class="flex w-full items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium text-text transition hover:bg-background">
+					{#if theme === 'dark'}
+						<Sun size={18} />
+					{:else}
+						<Moon size={18} />
+					{/if}
+					{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+				</button>
+			</div>
 		</nav>
 	</aside>
 

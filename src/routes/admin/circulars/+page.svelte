@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { getStore, setStore, DEFAULT_CIRCULARS } from '$lib/stores/data';
 	import type { Circular } from '$lib/stores/data';
-import { Eye, Edit3, Trash2, X, Plus } from '@lucide/svelte';
+import { Edit3, Trash2, X, Plus } from '@lucide/svelte';
 
 	let items = $state(getStore('circulars', DEFAULT_CIRCULARS));
 	let search = $state('');
@@ -155,8 +155,18 @@ import { Eye, Edit3, Trash2, X, Plus } from '@lucide/svelte';
 					<input type="text" bind:value={form.date} placeholder="e.g. 12 January 2026" class="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary" />
 				</div>
 				<div>
-					<label class="mb-1 block text-sm font-medium text-text">PDF File Path</label>
-					<input type="text" bind:value={form.file} placeholder="/documents/circular.pdf" class="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary" />
+					<label class="mb-1 block text-sm font-medium text-text">PDF File</label>
+					<input type="file" accept=".pdf,application/pdf" onchange={(e) => {
+						const file = (e.target as HTMLInputElement).files?.[0];
+						if (file) {
+							const reader = new FileReader();
+							reader.onload = () => { form.file = reader.result as string; };
+							reader.readAsDataURL(file);
+						}
+					}} class="w-full text-sm text-text-muted file:mr-3 file:rounded-lg file:border-0 file:bg-primary file:px-3 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-primary-hover" />
+					{#if form.file}
+						<p class="mt-1 text-xs text-text-muted truncate">File selected</p>
+					{/if}
 				</div>
 			</div>
 			<div class="mt-6 flex justify-end gap-3">
@@ -198,7 +208,7 @@ import { Eye, Edit3, Trash2, X, Plus } from '@lucide/svelte';
 					<span class="text-text-muted">{selected.date}</span>
 				</div>
 				{#if selected.file}
-					<p class="text-sm text-text-muted">File: {selected.file}</p>
+					<a href={selected.file} target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline">View PDF</a>
 				{/if}
 			</div>
 

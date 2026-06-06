@@ -12,13 +12,9 @@
 
 	const districts = [
 		"All",
-		"Kozhikode",
-		"Malappuram",
-		"Ernakulam",
-		"Thrissur",
-		"Kannur",
-		"Palakkad",
-		"Kollam"
+		"Alappuzha", "Ernakulam", "Idukki", "Kannur", "Kasaragod",
+		"Kollam", "Kottayam", "Kozhikode", "Malappuram", "Palakkad",
+		"Pathanamthitta", "Thiruvananthapuram", "Thrissur", "Wayanad"
 	];
 
 	const members: MemberInstitution[] = [
