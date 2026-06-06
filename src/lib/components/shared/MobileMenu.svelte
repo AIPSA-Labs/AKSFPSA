@@ -1,6 +1,7 @@
 <script>
 	import { fly } from 'svelte/transition';
 	import NavLinks from './Navlink.svelte';
+	import { X } from '@lucide/svelte';
 
 	export let open = false;
 	export let close;
@@ -21,7 +22,7 @@
 	>
 		<div class="flex items-center justify-between border-b border-border pb-4">
 			<h2 class="font-semibold text-primary">Menu</h2>
-			<button on:click={close} class="text-xl text-primary">×</button>
+			<button on:click={close} class="text-primary"><X size={22} /></button>
 		</div>
 
 		<div class="mt-6">

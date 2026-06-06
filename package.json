@@ -34,5 +34,16 @@
 		"typescript": "^5.9.3",
 		"typescript-eslint": "^8.53.1",
 		"vite": "^7.3.1"
+	},
+	"dependencies": {
+		"@lucide/svelte": "^1.17.0",
+		"@tiptap/core": "^3.26.0",
+		"@tiptap/extension-code-block-lowlight": "^3.26.0",
+		"@tiptap/extension-image": "^3.26.0",
+		"@tiptap/extension-link": "^3.26.0",
+		"@tiptap/extension-placeholder": "^3.26.0",
+		"@tiptap/extension-text-align": "^3.26.0",
+		"@tiptap/html": "^3.26.0",
+		"@tiptap/starter-kit": "^3.26.0"
 	}
 }

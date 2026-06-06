@@ -16,7 +16,15 @@
 	};
 
 	function submit() {
-		console.log(form);
+		const subs = JSON.parse(localStorage.getItem('aksfpsa_submissions') || '[]');
+		subs.push({
+			id: Date.now(),
+			...form,
+			date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
+		});
+		localStorage.setItem('aksfpsa_submissions', JSON.stringify(subs));
+		alert('Thank you! Your inquiry has been submitted.');
+		form = { name: '', institution: '', email: '', phone: '', message: '' };
 	}
 </script>
 

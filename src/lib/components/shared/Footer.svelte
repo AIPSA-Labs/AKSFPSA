@@ -29,6 +29,7 @@
 					<li><a href="/membership" class="hover:text-primary">Membership</a></li>
 					<li><a href="/courses" class="hover:text-primary">Courses</a></li>
 					<li><a href="/events" class="hover:text-primary">Events</a></li>
+					<li><a href="/blog" class="hover:text-primary">Blog</a></li>
 					<li><a href="/circulars" class="hover:text-primary">Circulars</a></li>
 				</ul>
 			</div>

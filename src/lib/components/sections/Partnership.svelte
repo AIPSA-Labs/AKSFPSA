@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount, onDestroy, tick } from 'svelte';
 	import { browser } from '$app/environment';
+	import { X } from '@lucide/svelte';
 
 	type Partner = {
 		name: string;
@@ -193,10 +194,10 @@
 		<div class="relative w-full max-w-2xl rounded-xl border border-border bg-background p-10">
 			<button
 				type="button"
-				class="absolute top-4 right-6 text-2xl text-primary"
+				class="absolute top-4 right-6 text-primary"
 				on:click={closePartner}
 			>
-				×
+				<X size={24} />
 			</button>
 
 			<img src={selected.logo} alt={selected.name} class="mx-auto h-16 object-contain" />

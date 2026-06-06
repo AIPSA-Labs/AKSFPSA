@@ -2,8 +2,11 @@
 	import MobileMenu from './MobileMenu.svelte';
 	import NavLinks from './Navlink.svelte';
 	import Logo from '../../assets/logo.png';
+	import { Menu, Sun, Moon } from '@lucide/svelte';
+	import { getStoredTheme, setTheme } from '$lib/stores/theme';
 
 	let mobileOpen = false;
+	let theme = getStoredTheme();
 
 	function openMenu() {
 		mobileOpen = true;
@@ -13,6 +16,12 @@
 	function closeMenu() {
 		mobileOpen = false;
 		document.body.style.overflow = '';
+	}
+
+	function toggleTheme() {
+		const next = theme === 'dark' ? 'light' : 'dark';
+		setTheme(next);
+		theme = next;
 	}
 </script>
 
@@ -33,12 +42,28 @@
 			</div>
 
 			<!-- Desktop Nav -->
-			<div class="hidden md:block">
+			<div class="hidden items-center gap-4 md:flex">
 				<NavLinks />
+				<button on:click={toggleTheme} class="text-text-muted hover:text-primary transition-colors">
+					{#if theme === 'dark'}
+						<Sun size={18} />
+					{:else}
+						<Moon size={18} />
+					{/if}
+				</button>
 			</div>
 
 			<!-- Mobile Toggle -->
-			<button on:click={openMenu} class="text-2xl text-primary md:hidden"> ☰ </button>
+			<div class="flex items-center gap-2 md:hidden">
+				<button on:click={toggleTheme} class="text-primary">
+					{#if theme === 'dark'}
+						<Sun size={20} />
+					{:else}
+						<Moon size={20} />
+					{/if}
+				</button>
+				<button on:click={openMenu} class="text-primary"><Menu size={24} /></button>
+			</div>
 		</div>
 	</div>
 </header>
