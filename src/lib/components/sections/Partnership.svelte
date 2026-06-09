@@ -16,26 +16,26 @@
 	const partners: Partner[] = [
 		{
 			name: 'Varthana Finance',
-			logo: '/images/varthana-logo.png',
+			logo: 'https://picsum.photos/seed/varthana/200/80',
 			description:
 				'Providing structured financial solutions supporting infrastructure and institutional growth.',
 			url: 'https://www.varthana.com'
 		},
 		{
 			name: 'EduCert India',
-			logo: '/images/partner2.png',
+			logo: 'https://picsum.photos/seed/educert/200/80',
 			description: 'Certification and teacher development programs.',
 			url: 'https://example.com'
 		},
 		{
 			name: 'SchoolTech Solutions',
-			logo: '/images/partner3.png',
+			logo: 'https://picsum.photos/seed/schooltech/200/80',
 			description: 'Digital infrastructure for schools.',
 			url: 'https://example.com'
 		},
 		{
 			name: 'Kerala Edu Network',
-			logo: '/images/partner4.png',
+			logo: 'https://picsum.photos/seed/keralanet/200/80',
 			description: 'Collaborative educational initiatives.',
 			url: 'https://example.com'
 		}

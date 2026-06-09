@@ -151,10 +151,10 @@ export type BlogPost = {
 };
 
 export const DEFAULT_CIRCULARS: Circular[] = [
-	{ id: 1, title: 'Guidelines for Academic Year 2026–27', date: '12 January 2026', category: 'Administrative', file: '/documents/circular1.pdf' },
-	{ id: 2, title: 'District-Level Coordination Meeting Notice', date: '28 December 2025', category: 'Meeting Notice', file: '/documents/circular2.pdf' },
-	{ id: 3, title: 'Financial Partnership Update – Institutional Funding', date: '10 December 2025', category: 'Finance', file: '/documents/circular3.pdf' },
-	{ id: 4, title: 'Teacher Certification Program Announcement', date: '25 November 2025', category: 'Training', file: '/documents/circular4.pdf' }
+	{ id: 1, title: 'Guidelines for Academic Year 2026–27', date: '12 January 2026', category: 'Administrative', file: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
+	{ id: 2, title: 'District-Level Coordination Meeting Notice', date: '28 December 2025', category: 'Meeting Notice', file: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
+	{ id: 3, title: 'Financial Partnership Update – Institutional Funding', date: '10 December 2025', category: 'Finance', file: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
+	{ id: 4, title: 'Teacher Certification Program Announcement', date: '25 November 2025', category: 'Training', file: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' }
 ];
 
 export const DEFAULT_COURSES: Course[] = [
@@ -173,20 +173,20 @@ export const DEFAULT_EVENTS: Event[] = [
 export const DEFAULT_GALLERY_CATEGORIES: string[] = ['Conference', 'Meeting', 'Workshop'];
 
 export const DEFAULT_ALBUMS: GalleryAlbum[] = [
-	{ id: 1, slug: 'conference-2026', title: 'State-Level Educational Leadership Conference 2026', date: 'January 2026', category: 'Conference', cover: '/images/gallery/conference-cover.jpg', description: 'Statewide leadership conference focusing on institutional governance and policy alignment.', images: [
-		{ id: 1, src: '/images/gallery/conference/1.jpg', alt: 'Conference keynote session' },
-		{ id: 2, src: '/images/gallery/conference/2.jpg', alt: 'Panel discussion' },
-		{ id: 3, src: '/images/gallery/conference/3.jpg', alt: 'Group photo' },
-		{ id: 4, src: '/images/gallery/conference/4.jpg', alt: 'Networking session' }
+	{ id: 1, slug: 'conference-2026', title: 'State-Level Educational Leadership Conference 2026', date: 'January 2026', category: 'Conference', cover: 'https://picsum.photos/seed/conference-cover/800/600', description: 'Statewide leadership conference focusing on institutional governance and policy alignment.', images: [
+		{ id: 1, src: 'https://picsum.photos/seed/conference1/800/600', alt: 'Conference keynote session' },
+		{ id: 2, src: 'https://picsum.photos/seed/conference2/800/600', alt: 'Panel discussion' },
+		{ id: 3, src: 'https://picsum.photos/seed/conference3/800/600', alt: 'Group photo' },
+		{ id: 4, src: 'https://picsum.photos/seed/conference4/800/600', alt: 'Networking session' }
 	]},
-	{ id: 2, slug: 'district-meet-malappuram', title: 'District Coordinators Meeting – Malappuram', date: 'December 2025', category: 'Meeting', cover: '/images/gallery/malappuram-cover.jpg', description: 'District-level administrative coordination and membership engagement session.', images: [
-		{ id: 1, src: '/images/gallery/malappuram/1.jpg', alt: 'Meeting opening' },
-		{ id: 2, src: '/images/gallery/malappuram/2.jpg', alt: 'District representatives' },
-		{ id: 3, src: '/images/gallery/malappuram/3.jpg', alt: 'Closing remarks' }
+	{ id: 2, slug: 'district-meet-malappuram', title: 'District Coordinators Meeting – Malappuram', date: 'December 2025', category: 'Meeting', cover: 'https://picsum.photos/seed/malappuram-cover/800/600', description: 'District-level administrative coordination and membership engagement session.', images: [
+		{ id: 1, src: 'https://picsum.photos/seed/malappuram1/800/600', alt: 'Meeting opening' },
+		{ id: 2, src: 'https://picsum.photos/seed/malappuram2/800/600', alt: 'District representatives' },
+		{ id: 3, src: 'https://picsum.photos/seed/malappuram3/800/600', alt: 'Closing remarks' }
 	]},
-	{ id: 3, slug: 'teacher-certification-2025', title: 'Teacher Certification Program 2025', date: 'November 2025', category: 'Workshop', cover: '/images/gallery/certification-cover.jpg', description: 'Professional development initiative conducted for faculty members across member institutions.', images: [
-		{ id: 1, src: '/images/gallery/certification/1.jpg', alt: 'Workshop session' },
-		{ id: 2, src: '/images/gallery/certification/2.jpg', alt: 'Participants' }
+	{ id: 3, slug: 'teacher-certification-2025', title: 'Teacher Certification Program 2025', date: 'November 2025', category: 'Workshop', cover: 'https://picsum.photos/seed/certification-cover/800/600', description: 'Professional development initiative conducted for faculty members across member institutions.', images: [
+		{ id: 1, src: 'https://picsum.photos/seed/certification1/800/600', alt: 'Workshop session' },
+		{ id: 2, src: 'https://picsum.photos/seed/certification2/800/600', alt: 'Participants' }
 	]}
 ];
 

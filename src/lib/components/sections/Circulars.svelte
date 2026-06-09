@@ -13,28 +13,28 @@
 			title: 'Guidelines for Academic Year 2026–27',
 			date: '12 January 2026',
 			category: 'Administrative',
-			file: '/documents/circular1.pdf'
+			file: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'
 		},
 		{
 			id: 2,
 			title: 'District-Level Coordination Meeting Notice',
 			date: '28 December 2025',
 			category: 'Meeting Notice',
-			file: '/documents/circular2.pdf'
+			file: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'
 		},
 		{
 			id: 3,
 			title: 'Financial Partnership Update – Institutional Funding',
 			date: '10 December 2025',
 			category: 'Finance',
-			file: '/documents/circular3.pdf'
+			file: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'
 		},
 		{
 			id: 4,
 			title: 'Teacher Certification Program Announcement',
 			date: '25 November 2025',
 			category: 'Training',
-			file: '/documents/circular4.pdf'
+			file: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'
 		}
 	];
 </script>

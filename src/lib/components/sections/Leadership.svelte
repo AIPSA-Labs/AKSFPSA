@@ -10,25 +10,25 @@
 		{
 			name: 'Mr. John Mathew',
 			role: 'President',
-			image: '/images/president.jpg',
+			image: 'https://picsum.photos/seed/president/200/200',
 			district: 'Kozhikode'
 		},
 		{
 			name: 'Mrs. Anjali Nair',
 			role: 'General Secretary',
-			image: '/images/secretary.jpg',
+			image: 'https://picsum.photos/seed/secretary/200/200',
 			district: 'Malappuram'
 		},
 		{
 			name: 'Mr. Rahim Khan',
 			role: 'Treasurer',
-			image: '/images/treasurer.jpg',
+			image: 'https://picsum.photos/seed/treasurer/200/200',
 			district: 'Ernakulam'
 		},
 		{
 			name: 'Mr. Suresh Kumar',
 			role: 'Joint Secretary',
-			image: '/images/joint-secretary.jpg',
+			image: 'https://picsum.photos/seed/jointsecretary/200/200',
 			district: 'Thrissur'
 		}
 	];

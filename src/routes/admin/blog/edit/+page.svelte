@@ -182,7 +182,7 @@
 		<div class="space-y-5">
 			<div>
 				<label for="cover" class="mb-1.5 block text-sm font-medium text-text">Cover Image URL</label>
-				<input id="cover" type="text" bind:value={form.cover} placeholder="/images/blog/cover.jpg"
+				<input id="cover" type="text" bind:value={form.cover} placeholder="Paste image URL or leave empty"
 					class="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm outline-none transition focus:border-primary" />
 				<p class="mt-1 text-xs text-text-muted">Optional. Enter a URL or path to the cover image.</p>
 			</div>

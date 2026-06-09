@@ -14,22 +14,22 @@
 			title: 'State-Level Educational Leadership Conference 2026',
 			description:
 				'Educational leaders from across Kerala convened to discuss institutional growth and policy direction.',
-			image: '/images/highlight1.jpg',
+			image: 'https://placehold.co/800x600/1e293b/ffffff?text=Leadership+Conference+2026',
 			link: '/gallery/conference-2026'
 		},
 		{
 			title: 'District Coordinators Meeting – Malappuram',
 			description:
 				'District-level coordination meeting focusing on administrative alignment and membership expansion.',
-			image: '/images/highlight2.jpg',
-			link: '/gallery/malappuram-meet'
+			image: 'https://placehold.co/800x600/1e293b/ffffff?text=District+Meet+Malappuram',
+			link: '/gallery/district-meet-malappuram'
 		},
 		{
 			title: 'Teacher Certification Program',
 			description:
 				'Professional certification workshop conducted for faculty members across member institutions.',
-			image: '/images/highlight3.jpg',
-			link: '/gallery/certification-program'
+			image: 'https://placehold.co/800x600/1e293b/ffffff?text=Teacher+Certification',
+			link: '/gallery/teacher-certification-2025'
 		}
 	];
 

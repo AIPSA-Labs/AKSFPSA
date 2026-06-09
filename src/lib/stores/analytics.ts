@@ -23,17 +23,7 @@ const LABEL_MAP: Record<string, string> = {
 	'/members': 'Members',
 	'/membership': 'Membership',
 	'/contact': 'Contact',
-	'/admin': 'Dashboard',
-	'/admin/circulars': 'Circulars',
-	'/admin/courses': 'Courses',
-	'/admin/blog': 'Blog & Events',
-	'/admin/gallery': 'Gallery',
-	'/admin/files': 'Files',
-	'/admin/leadership': 'Leadership',
-	'/admin/members': 'Members',
-	'/admin/faq': 'FAQ',
-	'/admin/contact': 'Contact',
-	'/admin/profile': 'Profile'
+	'/services': 'Services'
 };
 
 export function getViews(): PageView[] {
@@ -46,7 +36,7 @@ export function getViews(): PageView[] {
 
 export function trackView(path: string) {
 	if (typeof localStorage === 'undefined') return;
-	if (path.startsWith('/admin/login')) return;
+	if (path.startsWith('/admin')) return;
 	const views = getViews();
 	const label = Object.entries(LABEL_MAP).find(([k]) => path.startsWith(k))?.[1] || path;
 	views.push({ path, label, timestamp: Date.now() });
