@@ -25,6 +25,7 @@ export type Circular = {
 	date: string;
 	category: string;
 	file: string;
+	content?: string;
 };
 
 export type Course = {
@@ -35,6 +36,7 @@ export type Course = {
 	mode: string;
 	description: string;
 	link: string;
+	content?: string;
 };
 
 export type Event = {
@@ -44,6 +46,7 @@ export type Event = {
 	location: string;
 	type: string;
 	description: string;
+	content?: string;
 };
 
 export type GalleryImage = {
@@ -92,6 +95,7 @@ export type Service = {
 	description: string;
 	icon: string;
 	order: number;
+	content?: string;
 };
 
 export const DEFAULT_SERVICES: Service[] = [
@@ -122,7 +126,7 @@ export type FAQ = {
 export type ContactInfo = {
 	address: string;
 	email: string;
-	phone: string;
+	phones: string[];
 	hours: string;
 };
 
@@ -134,6 +138,9 @@ export type ContactSubmission = {
 	phone: string;
 	message: string;
 	date: string;
+	status: 'new' | 'contacted' | 'qualified' | 'converted' | 'closed';
+	notes: string;
+	source: string;
 };
 
 export type BlogPost = {
@@ -265,6 +272,6 @@ export const DEFAULT_BLOG_POSTS: BlogPost[] = [
 export const DEFAULT_CONTACT_INFO: ContactInfo = {
 	address: 'All Kerala Self Financing Private Schools Association\n123 Institutional Road\nErnakulam, Kerala – 682001',
 	email: 'info@association.org',
-	phone: '+91 98765 43210',
+	phones: ['+91 98765 43210'],
 	hours: 'Monday – Friday\n10:00 AM – 5:00 PM'
 };

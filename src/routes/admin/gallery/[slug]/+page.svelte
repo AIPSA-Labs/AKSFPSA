@@ -1,119 +1,107 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import { getStore, setStore, DEFAULT_ALBUMS, DEFAULT_GALLERY_CATEGORIES } from '$lib/stores/data';
+	import { list, create, update, remove } from '$lib/stores/api';
 	import type { GalleryAlbum, GalleryImage } from '$lib/stores/data';
 	import { ArrowLeft, Edit3, Trash2, Plus, Image as ImageIcon } from '@lucide/svelte';
 
+	let categories = $state(['Conference', 'Meeting', 'Workshop']);
 	let album = $state<GalleryAlbum | null>(null);
-	let items = $state<GalleryAlbum[]>([]);
-	let categories = $state<string[]>([]);
 
 	let showEditModal = $state(false);
 	let showDeleteConfirm = $state(false);
 
-	let editForm = $state<GalleryAlbum>({ id: 0, slug: '', title: '', date: '', category: '', cover: '', description: '', images: [] });
+	let editForm = $state({ id: 0, slug: '', title: '', date: '', category: '', cover: '', description: '', images: [] });
 
 	let pendingImages: GalleryImage[] = $state([]);
 
 	let deletingImageId = $state<number | null>(null);
 
-	let showCatModal = $state(false);
-	let newCat = $state('');
-
-	function loadAlbum() {
-		if (!browser) return;
-		items = getStore('albums', DEFAULT_ALBUMS);
-		categories = getStore('gallery_categories', DEFAULT_GALLERY_CATEGORIES);
-		album = items.find((a) => a.slug === $page.params.slug) ?? null;
-	}
-
-	onMount(loadAlbum);
-
-	function saveStore() {
-		setStore('albums', items);
-	}
-
-	function addCategory() {
-		const trimmed = newCat.trim();
-		if (trimmed && !categories.includes(trimmed)) {
-			categories = [...categories, trimmed];
-			setStore('gallery_categories', categories);
+	onMount(async () => {
+		try {
+			const items = await list<GalleryAlbum>('gallery');
+			album = items.find((a) => a.slug === $page.params.slug) ?? null;
+		} catch (e) {
+			console.error('Failed to load albums:', e);
 		}
-		newCat = '';
-		showCatModal = false;
-	}
+	});
 
 	function openEdit() {
 		if (!album) return;
-		editForm = { ...album, images: album.images.map((i) => ({ ...i })) };
+		editForm = { ...album, images: album.images.map((i) => ({ ...i })) } as any;
 		showEditModal = true;
 	}
 
-	function saveEdit() {
+	async function saveEdit() {
 		if (!album) return;
-		items = items.map((a) => (a.id === album!.id ? { ...editForm, images: editForm.images } : a));
-		saveStore();
-		album = items.find((a) => a.id === album!.id) ?? null;
+		const data = { ...editForm };
+		const updated = await update<GalleryAlbum>('gallery', album.id, data);
+		album = updated;
 		showEditModal = false;
 	}
 
-	function deleteAlbum() {
+	async function deleteAlbum() {
 		if (!album) return;
-		items = items.filter((a) => a.id !== album!.id);
-		saveStore();
+		for (const img of album.images) {
+			if (img.src.startsWith('http')) {
+				const key = extractR2Key(img.src);
+				if (key) await fetch('/api/upload', { method: 'DELETE', body: JSON.stringify({ key }), headers: { 'Content-Type': 'application/json' } });
+			}
+		}
+		if (album.cover && album.cover.startsWith('http')) {
+			const key = extractR2Key(album.cover);
+			if (key) await fetch('/api/upload', { method: 'DELETE', body: JSON.stringify({ key }), headers: { 'Content-Type': 'application/json' } });
+		}
+		await remove('gallery', album.id);
 		goto('/admin/gallery');
 	}
 
-	function addPendingImages() {
+	async function handlePendingUpload(e: Event) {
+		const files = (e.target as HTMLInputElement).files;
+		if (!files || !album) return;
+		const imgs: GalleryImage[] = [];
+		for (const file of files) {
+			const formData = new FormData();
+			formData.set('file', file);
+			formData.set('folder', `gallery/${album.slug || 'unknown'}`);
+			const res = await fetch('/api/upload', { method: 'POST', body: formData });
+			if (res.ok) {
+				const { url } = await res.json();
+				const created = await create<GalleryImage>('gallery-images', { album_id: album.id, src: url, alt: file.name.replace(/\.[^.]+$/, '') });
+				imgs.push(created);
+			}
+		}
+		pendingImages = [...pendingImages, ...imgs];
+		(e.target as HTMLInputElement).value = '';
+	}
+
+	async function addPendingImages() {
 		if (!album || pendingImages.length === 0) return;
-		items = items.map((a) => {
-			if (a.id === album!.id) return { ...a, images: [...a.images, ...pendingImages] };
-			return a;
-		});
-		saveStore();
-		album = items.find((a) => a.id === album!.id) ?? null;
+		album = { ...album, images: [...album.images, ...pendingImages] };
 		pendingImages = [];
 	}
 
-	function handlePendingUpload(e: Event) {
-		const files = (e.target as HTMLInputElement).files;
-		if (!files) return;
-		let maxId = 0;
-		if (album) maxId = Math.max(0, ...album.images.map((i) => i.id));
-		const imgs: GalleryImage[] = [];
-		let loaded = 0;
-		for (const file of files) {
-			const reader = new FileReader();
-			reader.onload = () => {
-				maxId++;
-				imgs.push({ id: maxId, src: reader.result as string, alt: file.name.replace(/\.[^.]+$/, '') });
-				loaded++;
-				if (loaded === files.length) {
-					pendingImages = [...pendingImages, ...imgs];
-				}
-			};
-			reader.readAsDataURL(file);
-		}
-		(e.target as HTMLInputElement).value = '';
+	function extractR2Key(url: string): string | null {
+		try {
+			const u = new URL(url);
+			return u.pathname.replace(/^\//, '');
+		} catch { return null; }
 	}
 
 	function confirmDeleteImage(id: number) {
 		deletingImageId = id;
 	}
 
-	function doDeleteImage() {
+	async function doDeleteImage() {
 		if (!album || deletingImageId === null) return;
-		items = items.map((a) => {
-			if (a.id === album!.id) {
-				return { ...a, images: a.images.filter((i) => i.id !== deletingImageId) };
-			}
-			return a;
-		});
-		saveStore();
-		album = items.find((a) => a.id === album!.id) ?? null;
+		const img = album.images.find((i) => i.id === deletingImageId);
+		if (img && img.src.startsWith('http')) {
+			const key = extractR2Key(img.src);
+			if (key) await fetch('/api/upload', { method: 'DELETE', body: JSON.stringify({ key }), headers: { 'Content-Type': 'application/json' } });
+		}
+		await remove('gallery-images', deletingImageId);
+		album = { ...album, images: album.images.filter((i) => i.id !== deletingImageId) };
 		deletingImageId = null;
 	}
 </script>
@@ -227,12 +215,17 @@
 						</div>
 						<div>
 							<label class="mb-1 block text-sm font-medium text-text">Cover Image</label>
-							<input type="file" accept="image/*" onchange={(e) => {
+							<input type="file" accept="image/*" onchange={async (e) => {
 								const file = (e.target as HTMLInputElement).files?.[0];
 								if (file) {
-									const reader = new FileReader();
-									reader.onload = () => { editForm.cover = reader.result as string; };
-									reader.readAsDataURL(file);
+									const fd = new FormData();
+									fd.set('file', file);
+									fd.set('folder', `gallery/${editForm.slug || 'covers'}`);
+									const res = await fetch('/api/upload', { method: 'POST', body: fd });
+									if (res.ok) {
+										const { url } = await res.json();
+										editForm.cover = url;
+									}
 								}
 							}} class="w-full text-sm text-text-muted file:mr-3 file:rounded-lg file:border-0 file:bg-primary file:px-3 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-primary-hover" />
 							{#if editForm.cover}

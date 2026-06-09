@@ -83,7 +83,7 @@
 				<a
 					href={item.href}
 					onclick={closeSidebar}
-					class="flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition {$page.url.pathname === item.href ? 'bg-primary text-white' : 'text-text hover:bg-background'}"
+					class="flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition {$page.url.pathname === item.href || (item.href !== '/admin' && $page.url.pathname.startsWith(item.href + '/')) ? 'bg-primary text-white' : 'text-text hover:bg-background'}"
 				>
 					<item.icon size={18} />
 					{item.label}

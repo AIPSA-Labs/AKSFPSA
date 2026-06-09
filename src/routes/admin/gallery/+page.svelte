@@ -1,46 +1,60 @@
 <script lang="ts">
-	import { getStore, setStore, DEFAULT_ALBUMS, DEFAULT_GALLERY_CATEGORIES } from '$lib/stores/data';
-	import type { GalleryAlbum, GalleryImage } from '$lib/stores/data';
+	import { onMount } from 'svelte';
+	import { list, create, update } from '$lib/stores/api';
+	import type { GalleryAlbum } from '$lib/stores/data';
 	import { Plus, Image as ImageIcon } from '@lucide/svelte';
 	import { goto } from '$app/navigation';
 
-	let items = $state(getStore('albums', DEFAULT_ALBUMS));
+	let items = $state<GalleryAlbum[]>([]);
+	let loading = $state(true);
 	let search = $state('');
 	let catFilter = $state('All');
 	let showModal = $state(false);
 	let editing = $state<GalleryAlbum | null>(null);
-	let categories = $state(getStore('gallery_categories', DEFAULT_GALLERY_CATEGORIES));
+	let categories = $state<string[]>([]);
 
-	let form = $state<GalleryAlbum>({ id: 0, slug: '', title: '', date: '', category: '', cover: '', description: '', images: [] });
+	let form = $state({ id: 0, slug: '', title: '', date: '', category: '', cover: '', description: '', images: [] });
 
 	let showCatModal = $state(false);
 	let newCat = $state('');
+
+	onMount(async () => {
+		try {
+			items = await list<GalleryAlbum>('gallery');
+		} catch (e) {
+			console.error('Failed to load albums:', e);
+		} finally {
+			loading = false;
+		}
+	});
 
 	function addCategory() {
 		const trimmed = newCat.trim();
 		if (trimmed && !categories.includes(trimmed)) {
 			categories = [...categories, trimmed];
-			setStore('gallery_categories', categories);
 		}
 		newCat = '';
 		showCatModal = false;
 	}
 
-	function save() {
-		if (editing) {
-			items = items.map((a) => (a.id === editing!.id ? form : a));
-		} else {
-			form.id = Math.max(0, ...items.map((a) => a.id)) + 1;
-			form.slug = form.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-			items = [...items, { ...form }];
+	async function save() {
+		const data = { ...form };
+		if (!editing) {
+			data.slug = data.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
 		}
-		setStore('albums', items);
+		if (editing) {
+			const updated = await update<GalleryAlbum>('gallery', editing.id, data);
+			items = items.map((a) => (a.id === editing!.id ? updated : a));
+		} else {
+			const created = await create<GalleryAlbum>('gallery', data);
+			items = [...items, created];
+		}
 		closeModal();
 	}
 
 	function edit(item: GalleryAlbum) {
 		editing = item;
-		form = { ...item, images: item.images.map((i) => ({ ...i })) };
+		form = { ...item, images: item.images.map((i) => ({ ...i })) } as any;
 		showModal = true;
 	}
 

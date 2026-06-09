@@ -1,28 +1,23 @@
 <script lang="ts">
-	type ContactForm = {
-		name: string;
-		institution: string;
-		email: string;
-		phone: string;
-		message: string;
-	};
+	import { create } from '$lib/stores/api';
+	import type { ContactSubmission } from '$lib/stores/data';
 
-	let form: ContactForm = {
+	let form = $state({
 		name: '',
 		institution: '',
 		email: '',
 		phone: '',
 		message: ''
-	};
+	});
 
-	function submit() {
-		const subs = JSON.parse(localStorage.getItem('aksfpsa_submissions') || '[]');
-		subs.push({
-			id: Date.now(),
+	async function submit() {
+		await create<ContactSubmission>('contact-submissions', {
 			...form,
-			date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
+			date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }),
+			status: 'new',
+			notes: '',
+			source: 'website'
 		});
-		localStorage.setItem('aksfpsa_submissions', JSON.stringify(subs));
 		alert('Thank you! Your inquiry has been submitted.');
 		form = { name: '', institution: '', email: '', phone: '', message: '' };
 	}
@@ -106,7 +101,7 @@
 
 					<button
 						type="button"
-						on:click={submit}
+						onclick={submit}
 						class="w-full rounded-md bg-primary px-6 py-3 font-medium tracking-wide text-white transition hover:bg-primary-hover"
 					>
 						Submit Inquiry

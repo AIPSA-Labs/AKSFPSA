@@ -1,18 +1,16 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { browser } from '$app/environment';
-	import { getStore, DEFAULT_ALBUMS, DEFAULT_GALLERY_CATEGORIES } from '$lib/stores/data';
+	import { list } from '$lib/stores/api';
+	import type { GalleryAlbum } from '$lib/stores/data';
 	import { Image as ImageIcon } from '@lucide/svelte';
 
-	let albums = $state<(typeof DEFAULT_ALBUMS[number])[]>([]);
-	let categories = $state<string[]>([]);
+	let albums = $state<GalleryAlbum[]>([]);
+	let categories = $state<string[]>(['Conference', 'Meeting', 'Workshop']);
 	let search = $state('');
 	let catFilter = $state('All');
 
-	onMount(() => {
-		if (!browser) return;
-		albums = getStore('albums', DEFAULT_ALBUMS);
-		categories = getStore('gallery_categories', DEFAULT_GALLERY_CATEGORIES);
+	onMount(async () => {
+		albums = await list<GalleryAlbum>('gallery');
 	});
 
 	const filtered = $derived(

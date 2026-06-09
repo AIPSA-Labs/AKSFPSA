@@ -1,9 +1,11 @@
 <script lang="ts">
-	import { getStore, setStore, DEFAULT_BLOG_POSTS } from '$lib/stores/data';
+	import { onMount } from 'svelte';
+	import { list, update, remove } from '$lib/stores/api';
 	import type { BlogPost } from '$lib/stores/data';
 	import { Eye, Edit3, Trash2, X, Plus } from '@lucide/svelte';
 
-	let items = $state(getStore('blog_posts', DEFAULT_BLOG_POSTS));
+	let items = $state<BlogPost[]>([]);
+	let loading = $state(true);
 	let search = $state('');
 	let deleting = $state<BlogPost | null>(null);
 	let selected = $state<BlogPost | null>(null);
@@ -12,6 +14,16 @@
 	let categories = $state<string[]>([]);
 	let showCatModal = $state(false);
 	let newCat = $state('');
+
+	onMount(async () => {
+		try {
+			items = await list<BlogPost>('blog');
+		} catch (e) {
+			console.error('Failed to load posts:', e);
+		} finally {
+			loading = false;
+		}
+	});
 
 	function addCategory() {
 		const trimmed = newCat.trim();
@@ -33,18 +45,18 @@
 
 	function confirmDelete(item: BlogPost) { deleting = item; selected = null; }
 
-	function doDelete() {
+	async function doDelete() {
 		if (deleting) {
+			await remove('blog', deleting.id);
 			items = items.filter((b) => b.id !== deleting!.id);
-			setStore('blog_posts', items);
 			deleting = null;
 		}
 	}
 
-	function toggleStatus(item: BlogPost) {
-		const updated = { ...item, status: item.status === 'published' ? 'draft' as const : 'published' as const };
+	async function toggleStatus(item: BlogPost) {
+		const newStatus = item.status === 'published' ? 'draft' : 'published';
+		const updated = await update<BlogPost>('blog', item.id, { status: newStatus });
 		items = items.map((b) => (b.id === item.id ? updated : b));
-		setStore('blog_posts', items);
 		if (selected?.id === item.id) selected = updated;
 	}
 </script>
@@ -180,7 +192,7 @@
 					<span class="rounded-md px-2.5 py-0.5 text-xs font-medium {selected.type === 'event' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'}">
 						{selected.type === 'event' ? 'Event' : 'Post'}
 					</span>
-					<button onclick={(e) => { e.stopPropagation(); toggleStatus(selected); }}
+					<button onclick={(e) => { e.stopPropagation(); toggleStatus(selected!); }}
 						class="rounded-md px-2.5 py-0.5 text-xs font-medium {selected.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}">
 						{selected.status}
 					</button>
@@ -210,7 +222,7 @@
 					class="flex items-center justify-center gap-1.5 rounded-lg bg-primary px-3 py-2.5 text-sm font-medium text-white transition hover:bg-primary-hover">
 					<Edit3 size={16} /> Edit
 				</a>
-				<button onclick={() => confirmDelete(selected)}
+				<button onclick={() => { const s = selected; if (s) confirmDelete(s); }}
 					class="flex items-center justify-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm font-medium text-red-600 transition hover:bg-red-100">
 					<Trash2 size={16} /> Delete
 				</button>

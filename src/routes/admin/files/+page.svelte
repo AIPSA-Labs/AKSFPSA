@@ -1,9 +1,11 @@
 <script lang="ts">
-	import { getStore, setStore, DEFAULT_FILES } from '$lib/stores/data';
+	import { onMount } from 'svelte';
+	import { list, create, remove } from '$lib/stores/api';
 	import type { UploadedFile } from '$lib/stores/data';
 	import { Upload, Trash2, Download, Copy, X, File, FileImage, FileText, FolderOpen } from '@lucide/svelte';
 
-	let items = $state(getStore('uploaded_files', DEFAULT_FILES));
+	let items = $state<UploadedFile[]>([]);
+	let loading = $state(true);
 	let search = $state('');
 	let typeFilter = $state('All');
 	let showUploadModal = $state(false);
@@ -13,6 +15,16 @@
 	let uploadError = $state('');
 
 	const fileTypes = ['All', 'Images', 'PDFs', 'Documents', 'Others'];
+
+	onMount(async () => {
+		try {
+			items = await list<UploadedFile>('files');
+		} catch (e) {
+			console.error('Failed to load files:', e);
+		} finally {
+			loading = false;
+		}
+	});
 
 	function getFileCategory(type: string): string {
 		if (type.startsWith('image/')) return 'Images';
@@ -41,26 +53,24 @@
 		})
 	);
 
-	function handleFileSelect(e: Event) {
+	async function handleFileSelect(e: Event) {
 		const files = (e.target as HTMLInputElement).files;
 		if (!files || files.length === 0) return;
 		uploadError = '';
 		const newFiles: { name: string; type: string; size: number; data: string }[] = [];
-		let loaded = 0;
 		for (const file of Array.from(files)) {
-			const reader = new FileReader();
-			reader.onload = () => {
-				newFiles.push({ name: file.name, type: file.type, size: file.size, data: reader.result as string });
-				loaded++;
-				if (loaded === files.length) {
-					pendingFiles = [...pendingFiles, ...newFiles];
-				}
-			};
-			reader.onerror = () => {
-				uploadError = `Failed to read ${file.name}`;
-			};
-			reader.readAsDataURL(file);
+			const formData = new FormData();
+			formData.set('file', file);
+			formData.set('folder', 'files');
+			const res = await fetch('/api/upload', { method: 'POST', body: formData });
+			if (res.ok) {
+				const { url } = await res.json();
+				newFiles.push({ name: file.name, type: file.type, size: file.size, data: url });
+			} else {
+				uploadError = `Failed to upload ${file.name}`;
+			}
 		}
+		pendingFiles = [...pendingFiles, ...newFiles];
 		(e.target as HTMLInputElement).value = '';
 	}
 
@@ -68,19 +78,19 @@
 		pendingFiles = pendingFiles.filter((_, i) => i !== index);
 	}
 
-	function doUpload() {
+	async function doUpload() {
 		if (pendingFiles.length === 0) return;
-		const maxId = Math.max(0, ...items.map((f) => f.id));
-		const newItems = pendingFiles.map((pf, i) => ({
-			id: maxId + i + 1,
-			name: pf.name,
-			type: pf.type,
-			size: pf.size,
-			data: pf.data,
-			date: new Date().toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })
-		}));
-		items = [...items, ...newItems];
-		setStore('uploaded_files', items);
+		const date = new Date().toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' });
+		for (const pf of pendingFiles) {
+			const created = await create<UploadedFile>('files', {
+				name: pf.name,
+				type: pf.type,
+				size: pf.size,
+				data: pf.data,
+				date
+			});
+			items = [...items, created];
+		}
 		pendingFiles = [];
 		showUploadModal = false;
 	}
@@ -91,36 +101,37 @@
 		showUploadModal = false;
 	}
 
+	function extractR2Key(url: string): string | null {
+		try { return new URL(url).pathname.replace(/^\//, ''); } catch { return null; }
+	}
+
 	function copyDataUrl(file: UploadedFile) {
 		navigator.clipboard.writeText(file.data);
 	}
 
-	async function downloadFile(file: UploadedFile) {
-		try {
-			const resp = await fetch(file.data);
-			const blob = await resp.blob();
-			const url = URL.createObjectURL(blob);
-			const a = document.createElement('a');
-			a.href = url;
-			a.download = file.name;
-			document.body.appendChild(a);
-			a.click();
-			document.body.removeChild(a);
-			URL.revokeObjectURL(url);
-		} catch {
-			// fallback: open in new tab
-			window.open(file.data, '_blank');
-		}
+	function downloadFile(file: UploadedFile) {
+		const a = document.createElement('a');
+		a.href = file.data;
+		a.download = file.name;
+		a.target = '_blank';
+		a.rel = 'noopener noreferrer';
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
 	}
 
 	function confirmDelete(file: UploadedFile) {
 		deleting = file;
 	}
 
-	function doDelete() {
+	async function doDelete() {
 		if (!deleting) return;
+		if (deleting.data.startsWith('http')) {
+			const key = extractR2Key(deleting.data);
+			if (key) await fetch('/api/upload', { method: 'DELETE', body: JSON.stringify({ key }), headers: { 'Content-Type': 'application/json' } });
+		}
+		await remove('files', deleting.id);
 		items = items.filter((f) => f.id !== deleting!.id);
-		setStore('uploaded_files', items);
 		if (selected?.id === deleting!.id) selected = null;
 		deleting = null;
 	}
@@ -240,13 +251,13 @@
 				<div class="flex justify-between"><span class="text-text-muted">Uploaded:</span><span class="font-medium text-text">{selected.date}</span></div>
 			</div>
 			<div class="mt-6 grid grid-cols-3 gap-3">
-				<button onclick={() => { copyDataUrl(selected); }} class="flex items-center justify-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-text-muted transition hover:bg-surface">
+				<button onclick={() => { const s = selected!; copyDataUrl(s); }} class="flex items-center justify-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-text-muted transition hover:bg-surface">
 					<Copy size={14} /> Copy
 				</button>
-				<button onclick={() => { downloadFile(selected); }} class="flex items-center justify-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-text-muted transition hover:bg-surface">
+				<button onclick={() => { const s = selected!; downloadFile(s); }} class="flex items-center justify-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-text-muted transition hover:bg-surface">
 					<Download size={14} /> Download
 				</button>
-				<button onclick={() => { selected = null; confirmDelete(selected); }} class="flex items-center justify-center gap-1.5 rounded-lg border border-red-200 px-3 py-2 text-sm text-red-600 transition hover:bg-red-50">
+				<button onclick={() => { const s = selected; selected = null; if (s) confirmDelete(s); }} class="flex items-center justify-center gap-1.5 rounded-lg border border-red-200 px-3 py-2 text-sm text-red-600 transition hover:bg-red-50">
 					<Trash2 size={14} /> Delete
 				</button>
 			</div>

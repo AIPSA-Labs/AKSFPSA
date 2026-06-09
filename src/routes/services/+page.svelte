@@ -1,14 +1,13 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { browser } from '$app/environment';
-	import { getStore, DEFAULT_SERVICES } from '$lib/stores/data';
+	import { list } from '$lib/stores/api';
+	import ContentCard from '$lib/components/shared/ContentCard.svelte';
 	import type { Service } from '$lib/stores/data';
 
 	let services = $state<Service[]>([]);
 
-	onMount(() => {
-		if (!browser) return;
-		services = getStore('services', DEFAULT_SERVICES);
+	onMount(async () => {
+		services = await list<Service>('services');
 	});
 
 	const iconMap: Record<string, string> = {
@@ -31,11 +30,11 @@
 
 		<div class="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
 			{#each services as service}
-				<div class="rounded-xl border border-border bg-surface p-8 transition hover:shadow-md">
-					<div class="text-4xl">{iconMap[service.icon] || '📋'}</div>
-					<h2 class="mt-4 text-xl font-semibold text-primary">{service.title}</h2>
-					<p class="mt-3 text-sm text-text-muted leading-relaxed">{service.description}</p>
-				</div>
+				<ContentCard
+					title={`${iconMap[service.icon] || '📋'} ${service.title}`}
+					excerpt={service.description}
+					content={service.content || ''}
+				/>
 			{/each}
 		</div>
 	</div>

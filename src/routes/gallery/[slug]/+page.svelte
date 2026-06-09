@@ -1,19 +1,18 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
-	import { getStore, DEFAULT_ALBUMS } from '$lib/stores/data';
+	import { list } from '$lib/stores/api';
+	import type { GalleryAlbum } from '$lib/stores/data';
 	import { ArrowLeft, ChevronLeft, ChevronRight, X } from '@lucide/svelte';
 
-	let album = $state<(typeof DEFAULT_ALBUMS[number]) | null>(null);
+	let album = $state<GalleryAlbum | null>(null);
 	let lightboxOpen = $state(false);
 	let currentIndex = $state(0);
 	let touchStartX = $state(0);
 	let touchEndX = $state(0);
 
-	onMount(() => {
-		if (!browser) return;
-		const albums = getStore('albums', DEFAULT_ALBUMS);
+	onMount(async () => {
+		const albums = await list<GalleryAlbum>('gallery');
 		album = albums.find((a) => a.slug === $page.params.slug) ?? null;
 	});
 
@@ -57,12 +56,10 @@
 	}
 
 	onMount(() => {
-		if (!browser) return;
 		window.addEventListener('keydown', handleKey);
 	});
 
 	onDestroy(() => {
-		if (!browser) return;
 		window.removeEventListener('keydown', handleKey);
 	});
 </script>

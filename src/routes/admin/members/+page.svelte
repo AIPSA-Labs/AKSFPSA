@@ -1,38 +1,50 @@
 <script lang="ts">
-	import { getStore, setStore, DEFAULT_MEMBERS } from '$lib/stores/data';
+	import { onMount } from 'svelte';
+	import { list, create, update, remove } from '$lib/stores/api';
 	import type { MemberInstitution } from '$lib/stores/data';
 	import { Eye, Edit3, Trash2, X, Plus } from '@lucide/svelte';
 
-	let items = $state(getStore('members', DEFAULT_MEMBERS));
+	let items = $state<MemberInstitution[]>([]);
+	let loading = $state(true);
 	let search = $state('');
 	let showModal = $state(false);
 	let editing = $state<MemberInstitution | null>(null);
 	let deleting = $state<MemberInstitution | null>(null);
 	let selected = $state<MemberInstitution | null>(null);
 
-	let form = $state<MemberInstitution>({ id: 0, name: '', district: '', category: 'Recognized', since: '' });
+	let form = $state({ id: 0, name: '', district: '', category: 'Recognized', since: '' });
 
 	const districts = ['Alappuzha', 'Ernakulam', 'Idukki', 'Kannur', 'Kasaragod', 'Kollam', 'Kottayam', 'Kozhikode', 'Malappuram', 'Palakkad', 'Pathanamthitta', 'Thiruvananthapuram', 'Thrissur', 'Wayanad'];
 	let categories = $state(['Recognized', 'Associate']);
 
-	function save() {
-		if (editing) {
-			items = items.map((m) => (m.id === editing!.id ? form : m));
-		} else {
-			form.id = Math.max(0, ...items.map((m) => m.id)) + 1;
-			items = [...items, { ...form }];
+	onMount(async () => {
+		try {
+			items = await list<MemberInstitution>('members');
+		} catch (e) {
+			console.error('Failed to load members:', e);
+		} finally {
+			loading = false;
 		}
-		setStore('members', items);
+	});
+
+	async function save() {
+		if (editing) {
+			const updated = await update<MemberInstitution>('members', editing.id, form);
+			items = items.map((m) => (m.id === editing!.id ? updated : m));
+		} else {
+			const created = await create<MemberInstitution>('members', form);
+			items = [...items, created];
+		}
 		closeModal();
 	}
 
-	function edit(item: MemberInstitution) { editing = item; form = { ...item }; showModal = true; }
+	function edit(item: MemberInstitution) { editing = item; form = { ...item } as any; showModal = true; }
 	function confirmDelete(item: MemberInstitution) { deleting = item; }
 
-	function doDelete() {
+	async function doDelete() {
 		if (deleting) {
+			await remove('members', deleting.id);
 			items = items.filter((m) => m.id !== deleting!.id);
-			setStore('members', items);
 			deleting = null;
 		}
 	}
@@ -199,11 +211,11 @@
 				</div>
 			</div>
 			<div class="grid grid-cols-2 gap-2 border-t border-border px-5 py-4">
-				<button onclick={(e) => { e.stopPropagation(); selected = null; edit(selected); }}
+				<button onclick={(e) => { e.stopPropagation(); const s = selected; selected = null; edit(s!); }}
 					class="flex items-center justify-center gap-1.5 rounded-lg bg-primary px-3 py-2.5 text-sm font-medium text-white transition hover:bg-primary-hover">
 					<Edit3 size={16} /> Edit
 				</button>
-				<button onclick={() => confirmDelete(selected)}
+				<button onclick={() => { const s = selected; if (s) confirmDelete(s); }}
 					class="flex items-center justify-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm font-medium text-red-600 transition hover:bg-red-100">
 					<Trash2 size={16} /> Delete
 				</button>

@@ -10,7 +10,7 @@
 		List, ListOrdered, TextQuote, Code2, Minus, AlignLeft, AlignCenter
 	} from '@lucide/svelte';
 
-	let { content = '', onUpdate }: { content?: string; onUpdate?: (html: string) => void } = $props();
+	let { content = '', onUpdate, compact = false }: { content?: string; onUpdate?: (html: string) => void; compact?: boolean } = $props();
 
 	let el: HTMLDivElement;
 	let editor: Editor;
@@ -63,10 +63,10 @@
 	}
 </script>
 
-<div bind:this={wrapperEl} class="tiptap-wrapper">
-	<div bind:this={el} class="tiptap-content min-h-[300px]"></div>
+<div bind:this={wrapperEl} class="tiptap-wrapper {compact ? 'min-h-[200px]' : ''}">
+	<div bind:this={el} class="tiptap-content min-h-[200px]"></div>
 </div>
-<div bind:this={actionbarEl} class="actionbar flex flex-nowrap gap-0.5 border-t border-border bg-surface p-2 shadow-lg overflow-x-auto">
+<div bind:this={actionbarEl} class="flex flex-nowrap gap-0.5 border-t border-border bg-surface p-2 shadow-lg overflow-x-auto {compact ? 'rounded-b-lg' : 'actionbar'}">
 	<button onclick={() => exec('undo')} class="rounded px-2 py-1 hover:bg-background" title="Undo"><Undo2 size={16} /></button>
 	<button onclick={() => exec('redo')} class="rounded px-2 py-1 hover:bg-background" title="Redo"><Redo2 size={16} /></button>
 	<span class="mx-1 w-px bg-border"></span>

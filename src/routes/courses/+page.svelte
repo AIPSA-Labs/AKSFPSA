@@ -1,4 +1,8 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+	import { list } from '$lib/stores/api';
+	import ContentCard from '$lib/components/shared/ContentCard.svelte';
+
 	type Course = {
 		id: number;
 		title: string;
@@ -7,59 +11,27 @@
 		mode: string;
 		description: string;
 		link: string;
+		content?: string;
 	};
 
-	let selectedCategory = "";
+	let selectedCategory = $state("");
 
 	const categories = ["All", "Administrative", "Professional Development", "Finance", "Technology"];
 
-	const courses: Course[] = [
-		{
-			id: 1,
-			title: "School Administration & Governance",
-			category: "Administrative",
-			duration: "6 Weeks",
-			mode: "Hybrid",
-			description:
-				"Structured program focusing on institutional governance, compliance frameworks, and leadership systems.",
-			link: "/courses/school-governance"
-		},
-		{
-			id: 2,
-			title: "Teacher Certification Program",
-			category: "Professional Development",
-			duration: "8 Weeks",
-			mode: "Offline",
-			description:
-				"Certification initiative designed to enhance pedagogical skills and academic excellence.",
-			link: "/courses/teacher-certification"
-		},
-		{
-			id: 3,
-			title: "Financial Planning for Institutions",
-			category: "Finance",
-			duration: "4 Weeks",
-			mode: "Online",
-			description:
-				"Guidance on budgeting, regulatory compliance, and sustainable institutional growth models.",
-			link: "/courses/financial-planning"
-		},
-		{
-			id: 4,
-			title: "Digital Infrastructure for Schools",
-			category: "Technology",
-			duration: "5 Weeks",
-			mode: "Hybrid",
-			description:
-				"Program covering digital transformation, administrative automation, and technology adoption.",
-			link: "/courses/digital-infrastructure"
-		}
-	];
+	let courses = $state<Course[]>([]);
+	let loading = $state(true);
 
-	$: filtered =
+	onMount(async () => {
+		try {
+			courses = await list<Course>('courses');
+		} catch { /* keep empty */ } finally { loading = false; }
+	});
+
+	const filtered = $derived(
 		selectedCategory === "" || selectedCategory === "All"
 			? courses
-			: courses.filter((c) => c.category === selectedCategory);
+			: courses.filter((c) => c.category === selectedCategory)
+	);
 </script>
 
 <section class="bg-background min-h-screen">
@@ -87,40 +59,16 @@
 		</div>
 
 		<div class="mt-12 grid md:grid-cols-2 gap-10">
-
 			{#each filtered as course}
-				<div class="border border-border rounded-lg p-8 bg-surface flex flex-col justify-between">
-
-					<div>
-						<span class="text-xs uppercase tracking-wide text-text-muted">
-							{course.category}
-						</span>
-
-						<h2 class="mt-3 text-xl font-semibold text-primary leading-tight">
-							{course.title}
-						</h2>
-
-						<p class="mt-3 text-sm text-text-muted">
-							Duration: {course.duration} • Mode: {course.mode}
-						</p>
-
-						<p class="mt-6 text-text-muted text-sm leading-relaxed">
-							{course.description}
-						</p>
-					</div>
-
-					<div class="mt-8">
-						<a
-							href={course.link}
-							class="inline-block border border-primary text-primary px-6 py-2 rounded-md text-sm font-medium tracking-wide hover:bg-background transition"
-						>
-							View Details
-						</a>
-					</div>
-
-				</div>
+				<ContentCard
+					title={course.title}
+					excerpt="{course.description}\nDuration: {course.duration} • Mode: {course.mode}"
+					content={course.content || ''}
+					ctaLabel="View Details"
+					ctaHref={course.link}
+					category={course.category}
+				/>
 			{/each}
-
 		</div>
 
 	</div>

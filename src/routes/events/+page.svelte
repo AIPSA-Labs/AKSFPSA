@@ -1,19 +1,24 @@
 <script lang="ts">
-	import { getStore, DEFAULT_BLOG_POSTS } from '$lib/stores/data';
+	import { onMount } from 'svelte';
+	import { list } from '$lib/stores/api';
 	import type { BlogPost } from '$lib/stores/data';
 
-	const events: BlogPost[] = getStore('blog_posts', DEFAULT_BLOG_POSTS)
-		.filter((p) => p.status === 'published' && p.type === 'event')
-		.sort((a, b) => {
-			const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-			const da = a.date.split(' ');
-			const db = b.date.split(' ');
-			const na = months.indexOf(da[1]) * 100 + parseInt(da[0]);
-			const nb = months.indexOf(db[1]) * 100 + parseInt(db[0]);
-			return nb - na;
-		});
-
+	let events = $state<BlogPost[]>([]);
 	let search = $state('');
+
+	onMount(async () => {
+		const posts = await list<BlogPost>('blog');
+		events = posts
+			.filter((p) => p.status === 'published' && p.type === 'event')
+			.sort((a, b) => {
+				const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+				const da = a.date.split(' ');
+				const db = b.date.split(' ');
+				const na = months.indexOf(da[1]) * 100 + parseInt(da[0]);
+				const nb = months.indexOf(db[1]) * 100 + parseInt(db[0]);
+				return nb - na;
+			});
+	});
 
 	const filtered = $derived(
 		events.filter(

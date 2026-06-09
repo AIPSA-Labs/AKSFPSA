@@ -1,4 +1,7 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+	import { list } from '$lib/stores/api';
+
 	type MemberInstitution = {
 		id: number;
 		name: string;
@@ -7,8 +10,8 @@
 		since: string;
 	};
 
-	let search = "";
-	let districtFilter = "";
+	let search = $state("");
+	let districtFilter = $state("");
 
 	const districts = [
 		"All",
@@ -17,38 +20,16 @@
 		"Pathanamthitta", "Thiruvananthapuram", "Thrissur", "Wayanad"
 	];
 
-	const members: MemberInstitution[] = [
-		{
-			id: 1,
-			name: "Green Valley Higher Secondary School",
-			district: "Kozhikode",
-			category: "Recognized",
-			since: "2022"
-		},
-		{
-			id: 2,
-			name: "Al Noor Public School",
-			district: "Malappuram",
-			category: "Associate",
-			since: "2023"
-		},
-		{
-			id: 3,
-			name: "St. Thomas Academy",
-			district: "Ernakulam",
-			category: "Recognized",
-			since: "2021"
-		},
-		{
-			id: 4,
-			name: "Modern Scholars School",
-			district: "Thrissur",
-			category: "Recognized",
-			since: "2024"
-		}
-	];
+	let members = $state<MemberInstitution[]>([]);
+	let loading = $state(true);
 
-	$: filtered = members.filter((m) => {
+	onMount(async () => {
+		try {
+			members = await list<MemberInstitution>('members');
+		} catch { /* keep empty */ } finally { loading = false; }
+	});
+
+	const filtered = $derived(members.filter((m) => {
 		const matchesSearch =
 			m.name.toLowerCase().includes(search.toLowerCase());
 
@@ -58,7 +39,7 @@
 			m.district === districtFilter;
 
 		return matchesSearch && matchesDistrict;
-	});
+	}));
 </script>
 
 <section class="bg-background min-h-screen">

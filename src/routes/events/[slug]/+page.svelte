@@ -1,59 +1,69 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
-	import { getStore, DEFAULT_BLOG_POSTS } from '$lib/stores/data';
+	import { list } from '$lib/stores/api';
 	import type { BlogPost } from '$lib/stores/data';
 
-	const posts: BlogPost[] = getStore('blog_posts', DEFAULT_BLOG_POSTS).filter((p) => p.status === 'published' && p.type === 'event');
-	const event = posts.find((p) => p.slug === $page.params.slug);
+	let event = $state<BlogPost | null>(null);
 
-	if (!event) {
-		throw new Error('Event not found');
-	}
+	onMount(async () => {
+		const posts = await list<BlogPost>('blog');
+		event = posts.find((p) => p.status === 'published' && p.type === 'event' && p.slug === $page.params.slug) ?? null;
+	});
 </script>
 
 <svelte:head>
-	<title>{event.title} — AKSFPSA Events</title>
-	<meta name="description" content={event.excerpt} />
+	{#if event}
+		<title>{event.title} — AKSFPSA Events</title>
+		<meta name="description" content={event.excerpt} />
+	{/if}
 </svelte:head>
 
 <section class="bg-background min-h-screen">
 	<div class="max-w-3xl mx-auto px-6 lg:px-8 py-20">
 		<a href="/events" class="inline-flex items-center gap-1 text-sm text-primary hover:underline mb-8">← Back to Events</a>
 
-		<article>
-			<div class="flex flex-wrap gap-2 mb-4">
-				{#each event.tags as tag}
-					<span class="rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">{tag}</span>
-				{/each}
-			</div>
-
-			<h1 class="text-3xl font-semibold text-primary leading-tight">{event.title}</h1>
-
-			<div class="mt-4 flex items-center gap-4 text-sm text-text-muted">
-				<span>{event.date}</span>
-				<span>•</span>
-				<span>{event.author}</span>
-			</div>
-
-			{#if event.cover}
-				<div class="mt-8 rounded-xl overflow-hidden">
-					<img src={event.cover} alt={event.title} class="w-full h-64 object-cover" />
+		{#if event}
+			<article>
+				<div class="flex flex-wrap gap-2 mb-4">
+					{#each event.tags as tag}
+						<span class="rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">{tag}</span>
+					{/each}
 				</div>
-			{/if}
 
-			<div class="mt-8 prose-content">
-				{@html event.content}
+				<h1 class="text-3xl font-semibold text-primary leading-tight">{event.title}</h1>
+
+				<div class="mt-4 flex items-center gap-4 text-sm text-text-muted">
+					<span>{event.date}</span>
+					<span>•</span>
+					<span>{event.author}</span>
+				</div>
+
+				{#if event.cover}
+					<div class="mt-8 rounded-xl overflow-hidden">
+						<img src={event.cover} alt={event.title} class="w-full h-64 object-cover" />
+					</div>
+				{/if}
+
+				<div class="mt-8 prose-content">
+					{@html event.content}
+				</div>
+			</article>
+
+			<div class="mt-12">
+				<a
+					href="/contact"
+					class="inline-block bg-primary text-white px-8 py-3 rounded-md font-medium tracking-wide hover:bg-primary-hover transition"
+				>
+					Register / Enquire
+				</a>
 			</div>
-		</article>
-
-		<div class="mt-12">
-			<a
-				href="/contact"
-				class="inline-block bg-primary text-white px-8 py-3 rounded-md font-medium tracking-wide hover:bg-primary-hover transition"
-			>
-				Register / Enquire
-			</a>
-		</div>
+		{:else}
+			<div class="mt-12 text-center text-text-muted">
+				<p>Event not found.</p>
+				<a href="/events" class="mt-2 inline-block text-primary hover:underline">Browse all events</a>
+			</div>
+		{/if}
 
 	</div>
 </section>

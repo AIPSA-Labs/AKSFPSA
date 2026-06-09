@@ -1,15 +1,17 @@
 <script lang="ts">
-	import { getStore, setStore, DEFAULT_LEADERS } from '$lib/stores/data';
+	import { onMount } from 'svelte';
+	import { list, create, update, remove } from '$lib/stores/api';
 	import type { Leader } from '$lib/stores/data';
 	import { Eye, Edit3, Trash2, X, Plus } from '@lucide/svelte';
 
-	let items = $state(getStore('leaders', DEFAULT_LEADERS));
+	let items = $state<Leader[]>([]);
+	let loading = $state(true);
 	let showModal = $state(false);
 	let editing = $state<Leader | null>(null);
 	let deleting = $state<Leader | null>(null);
 	let selected = $state<Leader | null>(null);
 
-	let form = $state<Leader>({ name: '', role: '', district: '', image: '', group: 'office-bearers' });
+	let form = $state({ name: '', role: '', district: '', image: '', group: 'office-bearers' });
 
 	let roles = $state(['President', 'General Secretary', 'Treasurer', 'Joint Secretary', 'Executive Member']);
 	const districts = ['Alappuzha', 'Ernakulam', 'Idukki', 'Kannur', 'Kasaragod', 'Kollam', 'Kottayam', 'Kozhikode', 'Malappuram', 'Palakkad', 'Pathanamthitta', 'Thiruvananthapuram', 'Thrissur', 'Wayanad'];
@@ -18,23 +20,42 @@
 		{ value: 'executive-members', label: 'Executive Members' }
 	];
 
-	function save() {
-		if (editing) {
-			items = items.map((l) => (l.name === editing!.name && l.group === editing!.group ? form : l));
-		} else {
-			items = [...items, { ...form }];
+	onMount(async () => {
+		try {
+			items = await list<Leader>('leaders');
+		} catch (e) {
+			console.error('Failed to load leaders:', e);
+		} finally {
+			loading = false;
 		}
-		setStore('leaders', items);
+	});
+
+	function extractR2Key(url: string): string | null {
+		try { return new URL(url).pathname.replace(/^\//, ''); } catch { return null; }
+	}
+
+	async function save() {
+		if (editing) {
+			const updated = await update<Leader>('leaders', (editing as any).id, form);
+			items = items.map((l) => (l as any).id === (editing as any).id ? updated : l);
+		} else {
+			const created = await create<Leader>('leaders', form);
+			items = [...items, created];
+		}
 		closeModal();
 	}
 
-	function edit(item: Leader) { editing = item; form = { ...item }; showModal = true; }
+	function edit(item: Leader) { editing = item; form = { ...item } as any; showModal = true; }
 	function confirmDelete(item: Leader) { deleting = item; selected = null; }
 
-	function doDelete() {
+	async function doDelete() {
 		if (deleting) {
-			items = items.filter((l) => !(l.name === deleting!.name && l.group === deleting!.group));
-			setStore('leaders', items);
+			if (deleting.image.startsWith('http')) {
+				const key = extractR2Key(deleting.image);
+				if (key) await fetch('/api/upload', { method: 'DELETE', body: JSON.stringify({ key }), headers: { 'Content-Type': 'application/json' } });
+			}
+			await remove('leaders', (deleting as any).id);
+			items = items.filter((l) => (l as any).id !== (deleting as any).id);
 			deleting = null;
 		}
 	}
@@ -184,12 +205,17 @@
 				</div>
 				<div>
 					<label class="mb-1 block text-sm font-medium text-text">Image</label>
-					<input type="file" accept="image/*" onchange={(e) => {
+					<input type="file" accept="image/*" onchange={async (e) => {
 						const file = (e.target as HTMLInputElement).files?.[0];
 						if (file) {
-							const reader = new FileReader();
-							reader.onload = () => { form.image = reader.result as string; };
-							reader.readAsDataURL(file);
+							const fd = new FormData();
+							fd.set('file', file);
+							fd.set('folder', 'leadership');
+							const res = await fetch('/api/upload', { method: 'POST', body: fd });
+							if (res.ok) {
+								const { url } = await res.json();
+								form.image = url;
+							}
 						}
 					}} class="w-full text-sm text-text-muted file:mr-3 file:rounded-lg file:border-0 file:bg-primary file:px-3 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-primary-hover" />
 					{#if form.image}
@@ -241,11 +267,11 @@
 				{/if}
 			</div>
 			<div class="grid grid-cols-2 gap-2 border-t border-border px-5 py-4">
-				<button onclick={(e) => { e.stopPropagation(); selected = null; edit(selected); }}
+				<button onclick={(e) => { e.stopPropagation(); const s = selected; selected = null; edit(s!); }}
 					class="flex items-center justify-center gap-1.5 rounded-lg bg-primary px-3 py-2.5 text-sm font-medium text-white transition hover:bg-primary-hover">
 					<Edit3 size={16} /> Edit
 				</button>
-				<button onclick={() => confirmDelete(selected)}
+				<button onclick={() => { const s = selected; if (s) confirmDelete(s); }}
 					class="flex items-center justify-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm font-medium text-red-600 transition hover:bg-red-100">
 					<Trash2 size={16} /> Delete
 				</button>

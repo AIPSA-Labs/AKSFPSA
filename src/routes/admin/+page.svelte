@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { getStore, DEFAULT_CIRCULARS, DEFAULT_COURSES, DEFAULT_ALBUMS, DEFAULT_LEADERS, DEFAULT_MEMBERS, DEFAULT_BLOG_POSTS, DEFAULT_FAQS, DEFAULT_FILES, DEFAULT_SERVICES } from '$lib/stores/data';
+	import { onMount } from 'svelte';
+	import { list } from '$lib/stores/api';
 	import {
 		FileText, BookOpen, Images,
 		Users, Building2, Feather, HelpCircle, FolderOpen, Gem,
@@ -17,16 +18,24 @@
 		color: string;
 	}
 
+	let counts = $state<Record<string, number>>({});
+
+	onMount(async () => {
+		const entities = ['circulars', 'courses', 'blog', 'services', 'gallery', 'leaders', 'members', 'faqs', 'files'];
+		const results = await Promise.all(entities.map(e => list(e).then(d => [e, d.length]).catch(() => [e, 0])));
+		counts = Object.fromEntries(results);
+	});
+
 	const stats: StatCard[] = [
-		{ label: 'Circulars', value: getStore('circulars', DEFAULT_CIRCULARS).length, icon: FileText, href: '/admin/circulars', color: 'border-l-primary' },
-		{ label: 'Courses', value: getStore('courses', DEFAULT_COURSES).length, icon: BookOpen, href: '/admin/courses', color: 'border-l-blue-500' },
-		{ label: 'Blog & Events', value: getStore('blog_posts', DEFAULT_BLOG_POSTS).length, icon: Feather, href: '/admin/blog', color: 'border-l-emerald-500' },
-		{ label: 'Services', value: getStore('services', DEFAULT_SERVICES).length, icon: Gem, href: '/admin/services', color: 'border-l-pink-500' },
-		{ label: 'Gallery Albums', value: getStore('albums', DEFAULT_ALBUMS).length, icon: Images, href: '/admin/gallery', color: 'border-l-amber-500' },
-		{ label: 'Leadership', value: getStore('leaders', DEFAULT_LEADERS).length, icon: Users, href: '/admin/leadership', color: 'border-l-violet-500' },
-		{ label: 'Members', value: getStore('members', DEFAULT_MEMBERS).length, icon: Building2, href: '/admin/members', color: 'border-l-cyan-500' },
-		{ label: 'FAQs', value: getStore('faqs', DEFAULT_FAQS).length, icon: HelpCircle, href: '/admin/faq', color: 'border-l-orange-500' },
-		{ label: 'Files', value: getStore('uploaded_files', DEFAULT_FILES).length, icon: FolderOpen, href: '/admin/files', color: 'border-l-teal-500' }
+		{ label: 'Circulars', value: counts['circulars'] ?? 0, icon: FileText, href: '/admin/circulars', color: 'border-l-primary' },
+		{ label: 'Courses', value: counts['courses'] ?? 0, icon: BookOpen, href: '/admin/courses', color: 'border-l-blue-500' },
+		{ label: 'Blog & Events', value: counts['blog'] ?? 0, icon: Feather, href: '/admin/blog', color: 'border-l-emerald-500' },
+		{ label: 'Services', value: counts['services'] ?? 0, icon: Gem, href: '/admin/services', color: 'border-l-pink-500' },
+		{ label: 'Gallery Albums', value: counts['gallery'] ?? 0, icon: Images, href: '/admin/gallery', color: 'border-l-amber-500' },
+		{ label: 'Leadership', value: counts['leaders'] ?? 0, icon: Users, href: '/admin/leadership', color: 'border-l-violet-500' },
+		{ label: 'Members', value: counts['members'] ?? 0, icon: Building2, href: '/admin/members', color: 'border-l-cyan-500' },
+		{ label: 'FAQs', value: counts['faqs'] ?? 0, icon: HelpCircle, href: '/admin/faq', color: 'border-l-orange-500' },
+		{ label: 'Files', value: counts['files'] ?? 0, icon: FolderOpen, href: '/admin/files', color: 'border-l-teal-500' }
 	];
 
 	let totalViews = $state(getTotalViews());

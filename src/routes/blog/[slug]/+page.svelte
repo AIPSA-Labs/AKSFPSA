@@ -1,50 +1,60 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
-	import { getStore, DEFAULT_BLOG_POSTS } from '$lib/stores/data';
+	import { list } from '$lib/stores/api';
 	import type { BlogPost } from '$lib/stores/data';
 
-	const posts: BlogPost[] = getStore('blog_posts', DEFAULT_BLOG_POSTS).filter((p) => p.status === 'published');
-	const post = posts.find((p) => p.slug === $page.params.slug);
+	let post = $state<BlogPost | null>(null);
 
-	if (!post) {
-		throw new Error('Post not found');
-	}
+	onMount(async () => {
+		const posts = await list<BlogPost>('blog');
+		post = posts.find((p) => p.status === 'published' && p.slug === $page.params.slug) ?? null;
+	});
 </script>
 
 <svelte:head>
-	<title>{post.title} — AKSFPSA</title>
-	<meta name="description" content={post.excerpt} />
+	{#if post}
+		<title>{post.title} — AKSFPSA</title>
+		<meta name="description" content={post.excerpt} />
+	{/if}
 </svelte:head>
 
 <section class="bg-background min-h-screen">
 	<div class="max-w-3xl mx-auto px-6 lg:px-8 py-20">
 		<a href="/blog" class="inline-flex items-center gap-1 text-sm text-primary hover:underline mb-8">← Back to Blog</a>
 
-		<article>
-			<div class="flex flex-wrap gap-2 mb-4">
-				{#each post.tags as tag}
-					<span class="rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">{tag}</span>
-				{/each}
-			</div>
-
-			<h1 class="text-3xl font-semibold text-primary leading-tight">{post.title}</h1>
-
-			<div class="mt-4 flex items-center gap-4 text-sm text-text-muted">
-				<span>{post.date}</span>
-				<span>•</span>
-				<span>{post.author}</span>
-			</div>
-
-			{#if post.cover}
-				<div class="mt-8 rounded-xl overflow-hidden">
-					<img src={post.cover} alt={post.title} class="w-full h-64 object-cover" />
+		{#if post}
+			<article>
+				<div class="flex flex-wrap gap-2 mb-4">
+					{#each post.tags as tag}
+						<span class="rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">{tag}</span>
+					{/each}
 				</div>
-			{/if}
 
-			<div class="mt-8 prose-content">
-				{@html post.content}
+				<h1 class="text-3xl font-semibold text-primary leading-tight">{post.title}</h1>
+
+				<div class="mt-4 flex items-center gap-4 text-sm text-text-muted">
+					<span>{post.date}</span>
+					<span>•</span>
+					<span>{post.author}</span>
+				</div>
+
+				{#if post.cover}
+					<div class="mt-8 rounded-xl overflow-hidden">
+						<img src={post.cover} alt={post.title} class="w-full h-64 object-cover" />
+					</div>
+				{/if}
+
+				<div class="mt-8 prose-content">
+					{@html post.content}
+				</div>
+			</article>
+		{:else}
+			<div class="mt-12 text-center text-text-muted">
+				<p>Post not found.</p>
+				<a href="/blog" class="mt-2 inline-block text-primary hover:underline">Browse all posts</a>
 			</div>
-		</article>
+		{/if}
 	</div>
 </section>
 

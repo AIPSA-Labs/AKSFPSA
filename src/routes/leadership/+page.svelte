@@ -1,58 +1,19 @@
 <script lang="ts">
-	type Member = {
-		name: string;
-		role: string;
-		district?: string;
-		image: string;
-	};
+	import { onMount } from 'svelte';
+	import { list } from '$lib/stores/api';
+	import type { Leader } from '$lib/stores/data';
 
-	const officeBearers: Member[] = [
-		{
-			name: "Mr. John Mathew",
-			role: "President",
-			district: "Kozhikode",
-			image: "https://picsum.photos/seed/president/200/200"
-		},
-		{
-			name: "Mrs. Anjali Nair",
-			role: "General Secretary",
-			district: "Malappuram",
-			image: "https://picsum.photos/seed/secretary/200/200"
-		},
-		{
-			name: "Mr. Rahim Khan",
-			role: "Treasurer",
-			district: "Ernakulam",
-			image: "https://picsum.photos/seed/treasurer/200/200"
-		}
-	];
+	let officeBearers = $state<Leader[]>([]);
+	let committeeMembers = $state<Leader[]>([]);
+	let loading = $state(true);
 
-	const committeeMembers: Member[] = [
-		{
-			name: "Mr. Suresh Kumar",
-			role: "Joint Secretary",
-			district: "Thrissur",
-			image: "https://picsum.photos/seed/member1/200/200"
-		},
-		{
-			name: "Mrs. Deepa Menon",
-			role: "Executive Member",
-			district: "Kannur",
-			image: "https://picsum.photos/seed/member2/200/200"
-		},
-		{
-			name: "Mr. Faisal Ahmed",
-			role: "Executive Member",
-			district: "Palakkad",
-			image: "https://picsum.photos/seed/member3/200/200"
-		},
-		{
-			name: "Mrs. Lakshmi Pillai",
-			role: "Executive Member",
-			district: "Kollam",
-			image: "https://picsum.photos/seed/member4/200/200"
-		}
-	];
+	onMount(async () => {
+		try {
+			const items = await list<Leader>('leaders');
+			officeBearers = items.filter(l => l.group === 'office-bearers');
+			committeeMembers = items.filter(l => l.group === 'executive-members');
+		} catch { /* keep empty */ } finally { loading = false; }
+	});
 </script>
 
 <section class="bg-background min-h-screen">

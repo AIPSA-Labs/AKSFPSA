@@ -1,49 +1,32 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+	import { list } from '$lib/stores/api';
+	import ContentCard from '$lib/components/shared/ContentCard.svelte';
+
 	type Circular = {
 		id: number;
 		title: string;
 		date: string;
 		category: string;
 		file: string;
+		content?: string;
 	};
 
-	let search = "";
-	let categoryFilter = "";
+	let search = $state("");
+	let categoryFilter = $state("");
 
 	const categories = ["All", "Administrative", "Meeting Notice", "Finance", "Training"];
 
-	const circulars: Circular[] = [
-		{
-			id: 1,
-			title: "Guidelines for Academic Year 2026–27",
-			date: "12 January 2026",
-			category: "Administrative",
-			file: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
-		},
-		{
-			id: 2,
-			title: "District-Level Coordination Meeting Notice",
-			date: "28 December 2025",
-			category: "Meeting Notice",
-			file: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
-		},
-		{
-			id: 3,
-			title: "Financial Partnership Update – Institutional Funding",
-			date: "10 December 2025",
-			category: "Finance",
-			file: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
-		},
-		{
-			id: 4,
-			title: "Teacher Certification Program Announcement",
-			date: "25 November 2025",
-			category: "Training",
-			file: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
-		}
-	];
+	let circulars = $state<Circular[]>([]);
+	let loading = $state(true);
 
-	$: filtered = circulars.filter((c) => {
+	onMount(async () => {
+		try {
+			circulars = await list<Circular>('circulars');
+		} catch { /* keep empty */ } finally { loading = false; }
+	});
+
+	const filtered = $derived(circulars.filter((c) => {
 		const matchesSearch =
 			c.title.toLowerCase().includes(search.toLowerCase());
 
@@ -53,7 +36,7 @@
 			c.category === categoryFilter;
 
 		return matchesSearch && matchesCategory;
-	});
+	}));
 </script>
 
 <section class="bg-background min-h-screen">
@@ -88,43 +71,23 @@
 
 		</div>
 
-		<div class="mt-12 border border-border rounded-lg overflow-hidden">
-
+		<div class="mt-12 space-y-4">
 			{#if filtered.length === 0}
 				<div class="p-10 text-text-muted text-center">
 					No circulars found.
 				</div>
 			{:else}
-				{#each filtered as circular, index}
-					<a
-						href={circular.file}
-						target="_blank"
-						rel="noopener noreferrer"
-						class={`flex flex-col md:flex-row md:items-center justify-between p-6 transition hover:bg-surface ${
-							index !== filtered.length - 1 ? "border-b border-border" : ""
-						}`}
-					>
-						<div class="space-y-2">
-							<span class="text-xs uppercase tracking-wide text-text-muted">
-								{circular.category}
-							</span>
-
-							<h3 class="text-lg font-semibold text-primary">
-								{circular.title}
-							</h3>
-
-							<p class="text-sm text-text-muted">
-								{circular.date}
-							</p>
-						</div>
-
-						<span class="mt-4 md:mt-0 text-sm font-medium text-primary uppercase tracking-wide">
-							View PDF
-						</span>
-					</a>
+				{#each filtered as circular}
+					<ContentCard
+						title={circular.title}
+						excerpt={circular.date}
+						content={circular.content || ''}
+						category={circular.category}
+						ctaLabel="View PDF"
+						ctaHref={circular.file}
+					/>
 				{/each}
 			{/if}
-
 		</div>
 
 	</div>
