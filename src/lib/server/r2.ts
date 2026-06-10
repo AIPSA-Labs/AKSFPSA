@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, ListObjectsV2Command } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, CopyObjectCommand, ListObjectsV2Command } from '@aws-sdk/client-s3';
 import { R2_ENDPOINT, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME, R2_PUBLIC_URL } from '$env/static/private';
 
 export const r2 = new S3Client({
@@ -35,6 +35,16 @@ export async function getFile(key: string) {
 	return response;
 }
 
+export async function copyFile(sourceKey: string, destKey: string) {
+	await r2.send(
+		new CopyObjectCommand({
+			Bucket: BUCKET,
+			CopySource: `${BUCKET}/${sourceKey}`,
+			Key: destKey
+		})
+	);
+}
+
 export async function deleteFile(key: string) {
 	await r2.send(
 		new DeleteObjectCommand({
@@ -56,7 +66,9 @@ export async function listFiles(prefix?: string) {
 
 export function getPublicUrl(key: string) {
 	if (PUBLIC_URL) {
-		return `${PUBLIC_URL.replace(/\/+$/, '')}/${key}`;
+		let base = PUBLIC_URL.replace(/\/+$/, '');
+		if (!/^https?:\/\//i.test(base)) base = `https://${base}`;
+		return `${base}/${key}`;
 	}
 	return `${R2_ENDPOINT.replace(/\/+$/, '')}/${BUCKET}/${key}`;
 }

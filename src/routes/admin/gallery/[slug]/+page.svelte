@@ -4,7 +4,9 @@
 	import { goto } from '$app/navigation';
 	import { list, create, update, remove } from '$lib/stores/api';
 	import type { GalleryAlbum, GalleryImage } from '$lib/stores/data';
-	import { ArrowLeft, Edit3, Trash2, Plus, Image as ImageIcon } from '@lucide/svelte';
+	import { ArrowLeft, Edit3, Trash2, Plus, Image as ImageIcon, LoaderCircle } from '@lucide/svelte';
+	import { compressImage } from '$lib/utils/compress';
+	import { snackbar, recentActions } from '$lib/stores/snackbar';
 
 	let categories = $state(['Conference', 'Meeting', 'Workshop']);
 	let album = $state<GalleryAlbum | null>(null);
@@ -14,7 +16,7 @@
 
 	let editForm = $state({ id: 0, slug: '', title: '', date: '', category: '', cover: '', description: '', images: [] });
 
-	let pendingImages: GalleryImage[] = $state([]);
+	let pendingImages: (GalleryImage & { uploading?: boolean })[] = $state([]);
 
 	let deletingImageId = $state<number | null>(null);
 
@@ -39,54 +41,80 @@
 		const updated = await update<GalleryAlbum>('gallery', album.id, data);
 		album = updated;
 		showEditModal = false;
+		snackbar.send('Album updated', 'success');
+		recentActions.add(`Updated album "${album.title}"`, 'gallery');
 	}
 
 	async function deleteAlbum() {
 		if (!album) return;
-		for (const img of album.images) {
-			if (img.src.startsWith('http')) {
-				const key = extractR2Key(img.src);
-				if (key) await fetch('/api/upload', { method: 'DELETE', body: JSON.stringify({ key }), headers: { 'Content-Type': 'application/json' } });
-			}
-		}
-		if (album.cover && album.cover.startsWith('http')) {
-			const key = extractR2Key(album.cover);
-			if (key) await fetch('/api/upload', { method: 'DELETE', body: JSON.stringify({ key }), headers: { 'Content-Type': 'application/json' } });
-		}
+		const title = album.title;
 		await remove('gallery', album.id);
+		snackbar.send(`Album "${title}" deleted`, 'success');
+		recentActions.add(`Deleted album "${title}"`, 'gallery');
 		goto('/admin/gallery');
 	}
 
 	async function handlePendingUpload(e: Event) {
-		const files = (e.target as HTMLInputElement).files;
-		if (!files || !album) return;
-		const imgs: GalleryImage[] = [];
+		const fileList = (e.target as HTMLInputElement).files;
+		if (!fileList || !album) return;
+		const files = Array.from(fileList);
+		let addedCount = 0;
+		let failCount = 0;
+
 		for (const file of files) {
-			const formData = new FormData();
-			formData.set('file', file);
-			formData.set('folder', `gallery/${album.slug || 'unknown'}`);
-			const res = await fetch('/api/upload', { method: 'POST', body: formData });
-			if (res.ok) {
-				const { url } = await res.json();
-				const created = await create<GalleryImage>('gallery-images', { album_id: album.id, src: url, alt: file.name.replace(/\.[^.]+$/, '') });
-				imgs.push(created);
+			const placeholderId = -Date.now() - Math.random();
+			const placeholder: any = { id: placeholderId, album_id: album.id, src: URL.createObjectURL(file), alt: file.name.replace(/\.[^.]+$/, ''), uploading: true };
+			pendingImages = [...pendingImages, placeholder];
+		}
+
+		(e.target as HTMLInputElement).value = '';
+
+		for (let i = 0; i < pendingImages.length; i++) {
+			const p = pendingImages[i];
+			if (!p.uploading) continue;
+			const fileIdx = i - (pendingImages.length - files.length);
+			const file = files[fileIdx];
+			if (!file) continue;
+			try {
+				const compressed = await compressImage(file);
+				const formData = new FormData();
+				formData.set('file', compressed, file.name);
+				const res = await fetch('/api/upload', { method: 'POST', body: formData });
+				if (res.ok) {
+					const { url } = await res.json();
+					const created = await create<GalleryImage>('gallery-images', { album_id: album.id, src: url, alt: file.name.replace(/\.[^.]+$/, '') });
+					pendingImages[i] = { ...created, uploading: false };
+					addedCount++;
+				} else {
+					pendingImages[i] = { ...p, uploading: false, error: 'Upload failed' };
+					failCount++;
+				}
+			} catch {
+				pendingImages[i] = { ...p, uploading: false, error: 'Upload error' };
+				failCount++;
 			}
 		}
-		pendingImages = [...pendingImages, ...imgs];
-		(e.target as HTMLInputElement).value = '';
+
+		if (failCount > 0) {
+			snackbar.send(`${failCount} image(s) failed to upload`, 'warning');
+		}
+		if (addedCount > 0 && failCount === 0) {
+			snackbar.send(`${addedCount} image(s) uploaded successfully`, 'success');
+		}
 	}
 
 	async function addPendingImages() {
 		if (!album || pendingImages.length === 0) return;
-		album = { ...album, images: [...album.images, ...pendingImages] };
+		const good = pendingImages.filter((p) => !(p as any).error);
+		if (good.length === 0) {
+			snackbar.send('No images to add — all failed to upload', 'error');
+			return;
+		}
+		album = { ...album, images: [...album.images, ...good] };
 		pendingImages = [];
-	}
-
-	function extractR2Key(url: string): string | null {
-		try {
-			const u = new URL(url);
-			return u.pathname.replace(/^\//, '');
-		} catch { return null; }
+		const count = good.length;
+		snackbar.send(`${count} image(s) added to album`, 'success');
+		recentActions.add(`Added images to album "${album.title}"`, 'gallery');
 	}
 
 	function confirmDeleteImage(id: number) {
@@ -95,13 +123,9 @@
 
 	async function doDeleteImage() {
 		if (!album || deletingImageId === null) return;
-		const img = album.images.find((i) => i.id === deletingImageId);
-		if (img && img.src.startsWith('http')) {
-			const key = extractR2Key(img.src);
-			if (key) await fetch('/api/upload', { method: 'DELETE', body: JSON.stringify({ key }), headers: { 'Content-Type': 'application/json' } });
-		}
 		await remove('gallery-images', deletingImageId);
 		album = { ...album, images: album.images.filter((i) => i.id !== deletingImageId) };
+		snackbar.send('Image deleted', 'success');
 		deletingImageId = null;
 	}
 </script>
@@ -152,16 +176,25 @@
 		<div class="flex flex-wrap items-center gap-3">
 			<input type="file" accept="image/*" multiple onchange={handlePendingUpload}
 				class="max-w-xs text-sm text-text-muted file:mr-3 file:rounded-lg file:border-0 file:bg-primary file:px-3 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-primary-hover" />
-			{#if pendingImages.length > 0}
+			{#if pendingImages.filter((p) => !(p as any).uploading && !(p as any).error).length > 0}
+				{@const good = pendingImages.filter((p) => !(p as any).uploading && !(p as any).error)}
 				<button onclick={addPendingImages}
-					class="rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-white transition hover:bg-primary-hover">Upload {pendingImages.length} image(s)</button>
+					class="rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-white transition hover:bg-primary-hover">Add {good.length} image(s)</button>
 			{/if}
 		</div>
 		{#if pendingImages.length > 0}
 			<div class="mt-3 flex flex-wrap gap-2">
 				{#each pendingImages as img}
-					<div class="h-16 w-20 overflow-hidden rounded-lg border border-border bg-background">
+					<div class="relative h-16 w-20 overflow-hidden rounded-lg border border-border bg-background">
 						<img src={img.src} alt={img.alt} class="h-full w-full object-cover" />
+						{#if (img as any).uploading}
+							<div class="absolute inset-0 flex items-center justify-center bg-black/40">
+								<LoaderCircle size={18} class="animate-spin text-white" />
+							</div>
+						{/if}
+						{#if (img as any).error}
+							<div class="absolute inset-x-0 bottom-0 bg-red-500/80 px-1 py-0.5 text-[10px] text-white leading-tight">{(img as any).error}</div>
+						{/if}
 					</div>
 				{/each}
 			</div>
@@ -220,7 +253,6 @@
 								if (file) {
 									const fd = new FormData();
 									fd.set('file', file);
-									fd.set('folder', `gallery/${editForm.slug || 'covers'}`);
 									const res = await fetch('/api/upload', { method: 'POST', body: fd });
 									if (res.ok) {
 										const { url } = await res.json();

@@ -3,6 +3,7 @@
 	import { get, create, update, remove, list } from '$lib/stores/api';
 	import type { ContactInfo, ContactSubmission } from '$lib/stores/data';
 	import { X } from '@lucide/svelte';
+	import { snackbar, recentActions } from '$lib/stores/snackbar';
 
 	let info = $state<ContactInfo>({ address: '', email: '', phones: [''], hours: '' });
 	let editing = $state(false);
@@ -26,6 +27,7 @@
 		const updated = await update<ContactInfo>('contact-info', 1, editForm);
 		info = updated;
 		editing = false;
+		try { snackbar.send('Contact info updated', 'success'); recentActions.add('Updated contact info', 'contact'); } catch {}
 	}
 
 	function startEdit() {
@@ -82,6 +84,7 @@
 		await update<ContactSubmission>('contact-submissions', s.id, updated);
 		items = items.map((r) => r.id === s.id ? updated : r);
 		selected = null;
+		try { snackbar.send('Enquiry updated', 'success'); } catch {}
 	}
 
 	async function confirmDelete() {
@@ -90,6 +93,7 @@
 		await remove('contact-submissions', id);
 		items = items.filter((r) => r.id !== id);
 		selected = null;
+		try { snackbar.send('Enquiry deleted', 'success'); } catch {}
 	}
 
 	function setStatus(st: string) {

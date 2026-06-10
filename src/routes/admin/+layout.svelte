@@ -8,6 +8,7 @@
 		Menu, User, Sun, Moon, FolderOpen, Gem
 	} from '@lucide/svelte';
 	import { getStoredTheme, setTheme } from '$lib/stores/theme';
+	import Snackbar from '$lib/components/admin/Snackbar.svelte';
 
 	let { children } = $props();
 
@@ -108,4 +109,5 @@
 			{@render children()}
 		</div>
 	</div>
+	<Snackbar />
 {/if}

@@ -6,6 +6,7 @@
 	import TipTap from '$lib/components/admin/TipTap.svelte';
 	import { onMount } from 'svelte';
 	import { Check, X } from '@lucide/svelte';
+	import { snackbar, recentActions } from '$lib/stores/snackbar';
 
 	const STEPS = [
 		{ num: 1, label: 'Title & Description' },
@@ -105,6 +106,7 @@
 			}
 		} catch (e) { console.error('Failed to save post:', e); }
 		saving = false;
+		try { snackbar.send(isNew ? 'Post created' : 'Post updated', 'success'); recentActions.add(`${isNew ? 'Created' : 'Updated'} post "${form.title}"`, 'blog'); } catch {}
 		goto('/admin/blog');
 	}
 </script>

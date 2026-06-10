@@ -3,6 +3,7 @@
 	import { list, update, remove } from '$lib/stores/api';
 	import type { BlogPost } from '$lib/stores/data';
 	import { Eye, Edit3, Trash2, X, Plus } from '@lucide/svelte';
+	import { snackbar, recentActions } from '$lib/stores/snackbar';
 
 	let items = $state<BlogPost[]>([]);
 	let loading = $state(true);
@@ -32,6 +33,7 @@
 		}
 		newCat = '';
 		showCatModal = false;
+		try { snackbar.send(`Category "${trimmed}" created`, 'success'); } catch {}
 	}
 
 	const filtered = $derived(
@@ -47,9 +49,11 @@
 
 	async function doDelete() {
 		if (deleting) {
+			const title = deleting.title;
 			await remove('blog', deleting.id);
 			items = items.filter((b) => b.id !== deleting!.id);
 			deleting = null;
+			try { snackbar.send('Post deleted', 'success'); recentActions.add(`Deleted post "${title}"`, 'blog'); } catch {}
 		}
 	}
 
@@ -58,6 +62,7 @@
 		const updated = await update<BlogPost>('blog', item.id, { status: newStatus });
 		items = items.map((b) => (b.id === item.id ? updated : b));
 		if (selected?.id === item.id) selected = updated;
+		try { snackbar.send(`Post "${item.title}" ${newStatus}`, 'success'); recentActions.add(`${newStatus === 'published' ? 'Published' : 'Drafted'} post "${item.title}"`, 'blog'); } catch {}
 	}
 </script>
 

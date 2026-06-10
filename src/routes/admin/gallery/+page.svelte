@@ -1,26 +1,44 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { list, create, update } from '$lib/stores/api';
+	import { list, create, update, remove } from '$lib/stores/api';
 	import type { GalleryAlbum } from '$lib/stores/data';
-	import { Plus, Image as ImageIcon } from '@lucide/svelte';
+	import { Plus, Image as ImageIcon, MoreVertical, Pencil, Trash2 } from '@lucide/svelte';
 	import { goto } from '$app/navigation';
+	import { snackbar, recentActions } from '$lib/stores/snackbar';
+
+	type Category = { id: number; name: string };
 
 	let items = $state<GalleryAlbum[]>([]);
 	let loading = $state(true);
 	let search = $state('');
 	let catFilter = $state('All');
-	let showModal = $state(false);
-	let editing = $state<GalleryAlbum | null>(null);
-	let categories = $state<string[]>([]);
+	let categories = $state<Category[]>([]);
+	let albumCountByCat = $state<Record<string, number>>({});
 
-	let form = $state({ id: 0, slug: '', title: '', date: '', category: '', cover: '', description: '', images: [] });
+	let openDropdown = $state<number | null>(null);
 
 	let showCatModal = $state(false);
+	let editCat = $state<Category | null>(null);
 	let newCat = $state('');
+
+	let deleteTarget = $state<Category | null>(null);
+
+	async function loadCategories() {
+		try {
+			const cats = await list<Category>('gallery-categories');
+			categories = cats.sort((a, b) => a.name.localeCompare(b.name));
+			const counts: Record<string, number> = {};
+			for (const a of items) {
+				if (a.category) counts[a.category] = (counts[a.category] || 0) + 1;
+			}
+			albumCountByCat = counts;
+		} catch {}
+	}
 
 	onMount(async () => {
 		try {
 			items = await list<GalleryAlbum>('gallery');
+			await loadCategories();
 		} catch (e) {
 			console.error('Failed to load albums:', e);
 		} finally {
@@ -28,43 +46,57 @@
 		}
 	});
 
-	function addCategory() {
-		const trimmed = newCat.trim();
-		if (trimmed && !categories.includes(trimmed)) {
-			categories = [...categories, trimmed];
+	function closeDropdown() { openDropdown = null; }
+
+	function openCatModal(cat?: Category) {
+		closeDropdown();
+		if (cat) {
+			editCat = cat;
+			newCat = cat.name;
+		} else {
+			editCat = null;
+			newCat = '';
 		}
+		showCatModal = true;
+	}
+
+	async function saveCategory() {
+		const trimmed = newCat.trim();
+		if (!trimmed) return;
+
+		try {
+			if (editCat) {
+				await update('gallery-categories', editCat.id, { name: trimmed });
+				snackbar.send(`Category renamed to "${trimmed}"`, 'success');
+				recentActions.add(`Renamed category "${editCat.name}" to "${trimmed}"`, 'gallery');
+			} else {
+				await create('gallery-categories', { name: trimmed });
+				snackbar.send(`Category "${trimmed}" created`, 'success');
+				recentActions.add(`Created gallery category "${trimmed}"`, 'gallery');
+			}
+			await loadCategories();
+		} catch (e) {
+			snackbar.send('Failed to save category', 'error');
+		}
+
 		newCat = '';
+		editCat = null;
 		showCatModal = false;
 	}
 
-	async function save() {
-		const data = { ...form };
-		if (!editing) {
-			data.slug = data.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+	async function confirmDelete() {
+		if (!deleteTarget) return;
+		try {
+			await remove('gallery-categories', deleteTarget.id);
+			snackbar.send(`Category "${deleteTarget.name}" deleted`, 'success');
+			recentActions.add(`Deleted gallery category "${deleteTarget.name}"`, 'gallery');
+			if (catFilter === deleteTarget.name) catFilter = 'All';
+			await loadCategories();
+		} catch (e) {
+			snackbar.send('Failed to delete category', 'error');
 		}
-		if (editing) {
-			const updated = await update<GalleryAlbum>('gallery', editing.id, data);
-			items = items.map((a) => (a.id === editing!.id ? updated : a));
-		} else {
-			const created = await create<GalleryAlbum>('gallery', data);
-			items = [...items, created];
-		}
-		closeModal();
+		deleteTarget = null;
 	}
-
-	function edit(item: GalleryAlbum) {
-		editing = item;
-		form = { ...item, images: item.images.map((i) => ({ ...i })) } as any;
-		showModal = true;
-	}
-
-	function openAdd() {
-		editing = null;
-		form = { id: 0, slug: '', title: '', date: '', category: '', cover: '', description: '', images: [] };
-		showModal = true;
-	}
-
-	function closeModal() { showModal = false; editing = null; }
 
 	const filtered = $derived(
 		items.filter((a) => {
@@ -80,8 +112,8 @@
 		<p class="mt-0.5 text-sm text-text-muted">{items.length} albums</p>
 	</div>
 	<div class="flex gap-2">
-		<button onclick={() => showCatModal = true} class="rounded-lg border border-border px-3 py-2 text-sm text-text-muted transition hover:bg-surface"><Plus size={16} class="inline" /> Create Category</button>
-		<button onclick={openAdd} class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-primary-hover">+ Add Album</button>
+		<button onclick={() => openCatModal()} class="rounded-lg border border-border px-3 py-2 text-sm text-text-muted transition hover:bg-surface"><Plus size={16} class="inline" /> Create Category</button>
+		<a href="/admin/gallery/new" class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-primary-hover inline-block">+ Add Album</a>
 	</div>
 </div>
 
@@ -91,10 +123,34 @@
 	<div class="flex flex-wrap gap-1">
 		<button onclick={() => catFilter = 'All'} class="rounded-lg px-3 py-1.5 text-xs font-medium transition {catFilter === 'All' ? 'bg-primary text-white' : 'border border-border text-text-muted hover:bg-surface'}">All</button>
 		{#each categories as cat}
-			<button onclick={() => catFilter = cat} class="rounded-lg px-3 py-1.5 text-xs font-medium transition {catFilter === cat ? 'bg-primary text-white' : 'border border-border text-text-muted hover:bg-surface'}">{cat}</button>
+			<div class="relative">
+				<button onclick={() => { catFilter = cat.name; closeDropdown(); }} class="rounded-l-lg border border-border px-3 py-1.5 text-xs font-medium transition {catFilter === cat.name ? 'bg-primary text-white' : 'text-text-muted hover:bg-surface'}">{cat.name}</button>
+				<button onclick={(e) => { e.stopPropagation(); openDropdown = openDropdown === cat.id ? null : cat.id; }} class="-ml-px rounded-r-lg border border-border px-1.5 py-1.5 text-xs text-text-muted transition hover:bg-surface {catFilter === cat.name ? 'border-primary bg-primary text-white hover:bg-primary-hover' : ''}">
+					<MoreVertical size={14} />
+				</button>
+				{#if openDropdown === cat.id}
+					<div class="absolute left-0 top-full z-50 mt-1 w-36 rounded-lg border border-border bg-surface py-1 shadow-lg" onclick={(e) => e.stopPropagation()}>
+						<button onclick={() => openCatModal(cat)} class="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm text-text transition hover:bg-background">
+							<Pencil size={14} /> Edit
+						</button>
+						<button onclick={() => { closeDropdown(); deleteTarget = cat; }} class="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm text-red-500 transition hover:bg-background">
+							<Trash2 size={14} /> Delete
+						</button>
+						{#if albumCountByCat[cat.name]}
+							<div class="border-t border-border px-3 py-1 text-[10px] text-text-muted">{albumCountByCat[cat.name]} album(s) use this</div>
+						{/if}
+					</div>
+				{/if}
+			</div>
 		{/each}
 	</div>
 </div>
+
+<!-- click-outside to close dropdown -->
+{#if openDropdown !== null}
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
+	<div class="fixed inset-0 z-40" onclick={closeDropdown}></div>
+{/if}
 
 <div class="mt-6 grid gap-5 sm:grid-cols-2 md:grid-cols-3">
 	{#each filtered as item}
@@ -119,79 +175,35 @@
 	{/if}
 </div>
 
-<!-- Create Category Modal -->
+<!-- Create / Edit Category Modal -->
 {#if showCatModal}
-	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onclick={() => showCatModal = false}>
+	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onclick={() => { showCatModal = false; editCat = null; newCat = ''; }}>
 		<div class="w-full max-w-sm rounded-xl border border-border bg-surface p-6 shadow-lg" onclick={(e) => e.stopPropagation()}>
-			<h2 class="text-lg font-semibold text-text">Create Category</h2>
+			<h2 class="text-lg font-semibold text-text">{editCat ? 'Edit Category' : 'Create Category'}</h2>
 			<div class="mt-4">
 				<label class="mb-1 block text-sm font-medium text-text">Category Name</label>
-				<input type="text" bind:value={newCat} placeholder="e.g. Seminar" class="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary"
-					onkeydown={(e) => { if (e.key === 'Enter') addCategory(); }} />
+				<input type="text" bind:value={newCat} placeholder="e.g. Seminar"
+					class="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary"
+					onkeydown={(e) => { if (e.key === 'Enter') saveCategory(); }} />
 			</div>
 			<div class="mt-6 flex justify-end gap-3">
-				<button onclick={() => { showCatModal = false; newCat = ''; }} class="rounded-lg border border-border px-4 py-2 text-sm text-text-muted">Cancel</button>
-				<button onclick={addCategory} class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white">Save</button>
+				<button onclick={() => { showCatModal = false; editCat = null; newCat = ''; }} class="rounded-lg border border-border px-4 py-2 text-sm text-text-muted">Cancel</button>
+				<button onclick={saveCategory} disabled={!newCat.trim()} class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white disabled:opacity-50">{editCat ? 'Update' : 'Save'}</button>
 			</div>
 		</div>
 	</div>
 {/if}
 
-<!-- Add/Edit Modal -->
-{#if showModal}
-	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onclick={closeModal}>
-		<div class="w-full max-w-2xl rounded-xl border border-border bg-surface p-6 shadow-lg" onclick={(e) => e.stopPropagation()}>
-			<h2 class="text-lg font-semibold text-primary">{editing ? 'Edit Album' : 'Add Album'}</h2>
-			<div class="mt-5 max-h-[70vh] space-y-4 overflow-y-auto">
-				<div class="grid grid-cols-2 gap-4">
-					<div>
-						<label class="mb-1 block text-sm font-medium text-text">Title</label>
-						<input type="text" bind:value={form.title} class="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary" />
-					</div>
-					<div>
-						<label class="mb-1 block text-sm font-medium text-text">Date</label>
-						<input type="text" bind:value={form.date} placeholder="e.g. January 2026" class="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary" />
-					</div>
-				</div>
-				<div class="grid grid-cols-2 gap-4">
-					<div>
-						<label class="mb-1 block text-sm font-medium text-text">Category</label>
-						<select bind:value={form.category} class="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary">
-							<option value="">Select</option>
-							{#each categories as cat}
-								<option value={cat}>{cat}</option>
-							{/each}
-						</select>
-					</div>
-					<div>
-						<label class="mb-1 block text-sm font-medium text-text">Cover Image</label>
-						<input type="file" accept="image/*" onchange={(e) => {
-							const file = (e.target as HTMLInputElement).files?.[0];
-							if (file) {
-								const reader = new FileReader();
-								reader.onload = () => { form.cover = reader.result as string; };
-								reader.readAsDataURL(file);
-							}
-						}} class="w-full text-sm text-text-muted file:mr-3 file:rounded-lg file:border-0 file:bg-primary file:px-3 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-primary-hover" />
-						{#if form.cover}
-							<div class="mt-2 h-20 w-32 overflow-hidden rounded-lg border border-border bg-background">
-								<img src={form.cover} alt="Cover preview" class="h-full w-full object-cover" />
-							</div>
-						{/if}
-					</div>
-				</div>
-				<div>
-					<label class="mb-1 block text-sm font-medium text-text">Description</label>
-					<textarea bind:value={form.description} rows="2" class="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary"></textarea>
-				</div>
-			</div>
+<!-- Delete Confirmation -->
+{#if deleteTarget}
+	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onclick={() => deleteTarget = null}>
+		<div class="w-full max-w-sm rounded-xl border border-border bg-surface p-6 shadow-lg" onclick={(e) => e.stopPropagation()}>
+			<h2 class="text-lg font-semibold text-text">Delete Category</h2>
+			<p class="mt-2 text-sm text-text-muted">Are you sure you want to delete "{deleteTarget.name}"? {albumCountByCat[deleteTarget.name] ? `This will NOT remove ${albumCountByCat[deleteTarget.name]} album(s) using it.` : ''}</p>
 			<div class="mt-6 flex justify-end gap-3">
-				<button onclick={closeModal} class="rounded-lg border border-border px-4 py-2 text-sm text-text-muted">Cancel</button>
-				<button onclick={save} class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white">Save</button>
+				<button onclick={() => deleteTarget = null} class="rounded-lg border border-border px-4 py-2 text-sm text-text-muted">Cancel</button>
+				<button onclick={confirmDelete} class="rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600">Delete</button>
 			</div>
 		</div>
 	</div>
 {/if}
-
-
-

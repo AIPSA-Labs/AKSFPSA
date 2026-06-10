@@ -10,12 +10,31 @@ export async function POST({ request }) {
 		return json({ error: 'No file provided' }, { status: 400 });
 	}
 
-	const buffer = await file.arrayBuffer();
+	if (!file.name) {
+		return json({ error: 'File has no name' }, { status: 400 });
+	}
+
+	let buffer: ArrayBuffer;
+	try {
+		buffer = await file.arrayBuffer();
+	} catch (e) {
+		return json({ error: 'Failed to read file data' }, { status: 500 });
+	}
+
+	if (buffer.byteLength === 0) {
+		return json({ error: 'File is empty' }, { status: 400 });
+	}
+
 	const ext = file.name.split('.').pop() || '';
 	const name = file.name.replace(/\.[^.]+$/, '').replace(/[^a-zA-Z0-9-_]/g, '_');
 	const key = `${folder}/${Date.now()}-${name.slice(0, 40)}.${ext}`;
 
-	const url = await uploadFile(key, new Uint8Array(buffer), file.type);
+	let url: string;
+	try {
+		url = await uploadFile(key, new Uint8Array(buffer), file.type);
+	} catch (e) {
+		return json({ error: 'R2 upload failed' }, { status: 500 });
+	}
 
 	return json({ url, key });
 }

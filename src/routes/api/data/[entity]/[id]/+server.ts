@@ -1,5 +1,6 @@
 import { json } from '@sveltejs/kit';
 import { sql } from '$lib/server/db';
+import { deleteFile } from '$lib/server/r2';
 
 const tables: Record<string, { table: string; id: string }> = {
 	circulars: { table: 'circulars', id: 'id' },
@@ -79,9 +80,34 @@ export async function DELETE({ params }) {
 	if (!condition) return json({ error: 'Invalid id' }, { status: 400 });
 
 	if (params.entity === 'gallery') {
+		const images = await sql`SELECT src FROM gallery_images WHERE album_id = ${Number(params.id)}`;
+		for (const img of images) {
+			const key = extractR2Key(img.src);
+			if (key) await deleteFile(key).catch(() => {});
+		}
+		const [album] = await sql`SELECT cover FROM ${sql(meta.table)} WHERE ${condition}`;
+		if (album?.cover) {
+			const key = extractR2Key(album.cover);
+			if (key) await deleteFile(key).catch(() => {});
+		}
 		await sql`DELETE FROM gallery_images WHERE album_id = ${Number(params.id)}`;
+	}
+
+	if (params.entity === 'gallery-images') {
+		const [img] = await sql`SELECT src FROM gallery_images WHERE id = ${Number(params.id)}`;
+		if (img?.src) {
+			const key = extractR2Key(img.src);
+			if (key) await deleteFile(key).catch(() => {});
+		}
 	}
 
 	await sql`DELETE FROM ${sql(meta.table)} WHERE ${condition}`;
 	return json({ success: true });
+}
+
+function extractR2Key(url: string): string | null {
+	try {
+		const u = new URL(url);
+		return u.pathname.replace(/^\//, '');
+	} catch { return null; }
 }

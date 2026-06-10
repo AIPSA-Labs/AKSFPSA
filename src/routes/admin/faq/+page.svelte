@@ -4,6 +4,7 @@
 	import type { FAQ } from '$lib/stores/data';
 	import TipTap from '$lib/components/admin/TipTap.svelte';
 	import { X, Plus } from '@lucide/svelte';
+	import { snackbar, recentActions } from '$lib/stores/snackbar';
 
 	let faqs = $state<FAQ[]>([]);
 	let loading = $state(true);
@@ -47,12 +48,14 @@
 			faqs = [...faqs, created];
 		}
 		showEditModal = false;
+		try { snackbar.send(editingFAQId !== null ? 'FAQ updated' : 'FAQ created', 'success'); recentActions.add(`${editingFAQId !== null ? 'Updated' : 'Created'} FAQ`, 'faqs'); } catch {}
 	}
 
 	async function removeFAQ(id: number) {
 		await remove('faqs', id);
 		faqs = faqs.filter((f) => (f as any).id !== id);
 		selected = null;
+		try { snackbar.send('FAQ deleted', 'success'); recentActions.add('Deleted FAQ', 'faqs'); } catch {}
 	}
 
 	function createFAQ() { openEdit(null); }

@@ -25,12 +25,15 @@
 
 	const isAdmin = $derived.by(() => $page.url.pathname.startsWith('/admin'));
 
+	const siteName = 'All Kerala Self Financing Private Schools Association';
+	const baseUrl = 'https://yourdomain.com';
+
 	const organizationSchema = {
 		'@context': 'https://schema.org',
 		'@type': 'Organization',
-		name: 'All Kerala Self Financing Private Schools Association',
-		url: 'https://yourdomain.com',
-		logo: 'https://yourdomain.com/logo.png',
+		name: siteName,
+		url: baseUrl,
+		logo: `${baseUrl}${favicon}`,
 		description:
 			'Statewide association representing private self-financing educational institutions across Kerala.',
 		address: {
@@ -54,9 +57,6 @@
 			'https://instagram.com/yourpage'
 		]
 	};
-
-	const siteName = 'All Kerala Self Financing Private Schools Association';
-	const baseUrl = 'https://yourdomain.com';
 
 	const meta = derived(page, ($page) => {
 		const title = $page.data?.meta?.title ?? siteName;
@@ -109,6 +109,9 @@
 	<meta property="og:description" content={$meta.description} />
 	<meta property="og:type" content="website" />
 	<meta property="og:url" content={$meta.url} />
+	<meta property="og:image" content={`${baseUrl}${favicon}`} />
+	<meta property="og:image:width" content="512" />
+	<meta property="og:image:height" content="512" />
 
 	<meta name="twitter:card" content="summary_large_image" />
 	<meta name="twitter:title" content={$meta.title} />

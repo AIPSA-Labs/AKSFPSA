@@ -6,6 +6,7 @@
 	import TipTap from '$lib/components/admin/TipTap.svelte';
 	import { onMount } from 'svelte';
 	import { Check } from '@lucide/svelte';
+	import { snackbar, recentActions } from '$lib/stores/snackbar';
 
 	const STEPS = [
 		{ num: 1, label: 'Title & Description' },
@@ -58,6 +59,7 @@
 			else await update<Service>('services', editingId!, data);
 		} catch (e) { console.error('Failed to save service:', e); }
 		saving = false;
+		try { snackbar.send(isNew ? 'Service created' : 'Service updated', 'success'); recentActions.add(`${isNew ? 'Created' : 'Updated'} service "${form.title}"`, 'services'); } catch {}
 		goto('/admin/services');
 	}
 </script>

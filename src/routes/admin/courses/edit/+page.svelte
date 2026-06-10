@@ -6,6 +6,7 @@
 	import TipTap from '$lib/components/admin/TipTap.svelte';
 	import { onMount } from 'svelte';
 	import { Check } from '@lucide/svelte';
+	import { snackbar, recentActions } from '$lib/stores/snackbar';
 
 	const STEPS = [
 		{ num: 1, label: 'Title & Description' },
@@ -62,6 +63,7 @@
 			else await update<Course>('courses', editingId!, data);
 		} catch (e) { console.error('Failed to save course:', e); }
 		saving = false;
+		try { snackbar.send(isNew ? 'Course created' : 'Course updated', 'success'); recentActions.add(`${isNew ? 'Created' : 'Updated'} course "${form.title}"`, 'courses'); } catch {}
 		goto('/admin/courses');
 	}
 </script>

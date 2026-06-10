@@ -3,6 +3,7 @@
 	import { list, create, remove } from '$lib/stores/api';
 	import type { UploadedFile } from '$lib/stores/data';
 	import { Upload, Trash2, Download, Copy, X, File, FileImage, FileText, FolderOpen } from '@lucide/svelte';
+	import { snackbar, recentActions } from '$lib/stores/snackbar';
 
 	let items = $state<UploadedFile[]>([]);
 	let loading = $state(true);
@@ -80,6 +81,7 @@
 
 	async function doUpload() {
 		if (pendingFiles.length === 0) return;
+		const count = pendingFiles.length;
 		const date = new Date().toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' });
 		for (const pf of pendingFiles) {
 			const created = await create<UploadedFile>('files', {
@@ -93,6 +95,7 @@
 		}
 		pendingFiles = [];
 		showUploadModal = false;
+		try { snackbar.send(`${count} file(s) uploaded`, 'success'); recentActions.add(`Uploaded ${count} file(s)`, 'files'); } catch {}
 	}
 
 	function closeUploadModal() {
@@ -126,6 +129,7 @@
 
 	async function doDelete() {
 		if (!deleting) return;
+		const name = deleting.name;
 		if (deleting.data.startsWith('http')) {
 			const key = extractR2Key(deleting.data);
 			if (key) await fetch('/api/upload', { method: 'DELETE', body: JSON.stringify({ key }), headers: { 'Content-Type': 'application/json' } });
@@ -134,6 +138,7 @@
 		items = items.filter((f) => f.id !== deleting!.id);
 		if (selected?.id === deleting!.id) selected = null;
 		deleting = null;
+		try { snackbar.send('File deleted', 'success'); recentActions.add(`Deleted file "${name}"`, 'files'); } catch {}
 	}
 
 	function openDetail(file: UploadedFile) {

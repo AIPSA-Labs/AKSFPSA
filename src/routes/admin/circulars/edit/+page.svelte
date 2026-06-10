@@ -6,6 +6,7 @@
 	import TipTap from '$lib/components/admin/TipTap.svelte';
 	import { onMount } from 'svelte';
 	import { Check } from '@lucide/svelte';
+	import { snackbar, recentActions } from '$lib/stores/snackbar';
 
 	const STEPS = [
 		{ num: 1, label: 'Title & Date' },
@@ -81,6 +82,7 @@
 			else await update<Circular>('circulars', editingId!, data);
 		} catch (e) { console.error('Failed to save circular:', e); }
 		saving = false;
+		try { snackbar.send(isNew ? 'Circular created' : 'Circular updated', 'success'); recentActions.add(`${isNew ? 'Created' : 'Updated'} circular "${form.title}"`, 'circulars'); } catch {}
 		goto('/admin/circulars');
 	}
 </script>

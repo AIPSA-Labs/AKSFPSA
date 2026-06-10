@@ -4,6 +4,7 @@
 	import { list, update, remove } from '$lib/stores/api';
 	import type { Service } from '$lib/stores/data';
 	import { Edit3, Trash2, X } from '@lucide/svelte';
+	import { snackbar, recentActions } from '$lib/stores/snackbar';
 
 	let items = $state<Service[]>([]);
 	let loading = $state(true);
@@ -24,9 +25,11 @@
 
 	async function doDelete() {
 		if (deleting) {
+			const title = deleting.title;
 			await remove('services', deleting.id);
 			items = items.filter((s) => s.id !== deleting!.id);
 			deleting = null;
+			try { snackbar.send('Service deleted', 'success'); recentActions.add(`Deleted service "${title}"`, 'services'); } catch {}
 		}
 	}
 

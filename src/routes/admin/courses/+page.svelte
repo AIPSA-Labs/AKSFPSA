@@ -4,6 +4,7 @@
 	import { list, remove } from '$lib/stores/api';
 	import type { Course } from '$lib/stores/data';
 	import { Edit3, Trash2, X, Plus } from '@lucide/svelte';
+	import { snackbar, recentActions } from '$lib/stores/snackbar';
 
 	let items = $state<Course[]>([]);
 	let loading = $state(true);
@@ -25,9 +26,11 @@
 
 	async function doDelete() {
 		if (deleting) {
+			const title = deleting.title;
 			await remove('courses', deleting.id);
 			items = items.filter((c) => c.id !== deleting!.id);
 			deleting = null;
+			try { snackbar.send('Course deleted', 'success'); recentActions.add(`Deleted course "${title}"`, 'courses'); } catch {}
 		}
 	}
 

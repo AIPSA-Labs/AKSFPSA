@@ -9,30 +9,30 @@
 			<div class="grid grid-cols-2 gap-10 text-center md:grid-cols-4">
 				<div>
 					<p class="text-4xl font-semibold tracking-tight text-primary lg:text-5xl">
-						<Counter value={1700} suffix="+" />
+						<Counter value={24000} suffix="+" />
 					</p>
 					<p class="mt-3 text-sm tracking-wider text-text-muted uppercase">Students</p>
 				</div>
 
 				<div>
 					<p class="text-4xl font-semibold tracking-tight text-primary lg:text-5xl">
-						<Counter value={60} suffix="+" />
+						<Counter value={3000} suffix="+" />
 					</p>
-					<p class="mt-3 text-sm tracking-wider text-text-muted uppercase">Courses</p>
+					<p class="mt-3 text-sm tracking-wider text-text-muted uppercase">Teachers</p>
 				</div>
 
 				<div>
 					<p class="text-4xl font-semibold tracking-tight text-primary lg:text-5xl">
-						<Counter value={800} suffix="+" />
-					</p>
-					<p class="mt-3 text-sm tracking-wider text-text-muted uppercase">Certified Teachers</p>
-				</div>
-
-				<div>
-					<p class="text-4xl font-semibold tracking-tight text-primary lg:text-5xl">
-						<Counter value={130} suffix="+" />
+						<Counter value={30} suffix="+" />
 					</p>
 					<p class="mt-3 text-sm tracking-wider text-text-muted uppercase">Awards</p>
+				</div>
+
+				<div>
+					<p class="text-4xl font-semibold tracking-tight text-primary lg:text-5xl">
+						<Counter value={20} suffix="+" />
+					</p>
+					<p class="mt-3 text-sm tracking-wider text-text-muted uppercase">Certified Courses</p>
 				</div>
 			</div>
 		</div>

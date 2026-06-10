@@ -8,6 +8,8 @@
 	} from '@lucide/svelte';
 	import LineChart from '$lib/components/admin/LineChart.svelte';
 	import { getDailyStats, getTotalViews, getTodayViews, getPageBreakdown } from '$lib/stores/analytics';
+	import { recentActions } from '$lib/stores/snackbar';
+	import { Clock, History } from '@lucide/svelte';
 	import type { Component } from 'svelte';
 
 	interface StatCard {
@@ -130,5 +132,26 @@
 				<p class="py-4 text-center text-sm text-text-muted">No page views yet. Browse the site to see analytics.</p>
 			{/if}
 		</div>
+	</div>
+</div>
+
+<div class="mt-6 rounded-xl border border-border bg-surface p-6">
+	<div class="flex items-center gap-2">
+		<History size={18} class="text-primary" />
+		<h2 class="text-lg font-semibold text-primary">Recent Actions</h2>
+	</div>
+	<div class="mt-4 space-y-1">
+		{#each $recentActions as action (action.id)}
+			<div class="flex items-center justify-between rounded-lg bg-background px-3 py-2">
+				<div class="flex items-center gap-2">
+					<Clock size={14} class="shrink-0 text-text-muted" />
+					<span class="text-sm text-text">{action.text}</span>
+				</div>
+				<span class="shrink-0 text-xs text-text-muted">{action.time}</span>
+			</div>
+		{/each}
+		{#if $recentActions.length === 0}
+			<p class="py-4 text-center text-sm text-text-muted">No recent actions yet. Start managing content to see actions here.</p>
+		{/if}
 	</div>
 </div>

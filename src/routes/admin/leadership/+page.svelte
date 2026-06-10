@@ -3,6 +3,7 @@
 	import { list, create, update, remove } from '$lib/stores/api';
 	import type { Leader } from '$lib/stores/data';
 	import { Eye, Edit3, Trash2, X, Plus } from '@lucide/svelte';
+	import { snackbar, recentActions } from '$lib/stores/snackbar';
 
 	let items = $state<Leader[]>([]);
 	let loading = $state(true);
@@ -42,7 +43,10 @@
 			const created = await create<Leader>('leaders', form);
 			items = [...items, created];
 		}
+		const isEditing = !!editing;
+		const name = form.name;
 		closeModal();
+		try { snackbar.send(isEditing ? 'Member updated' : 'Member added', 'success'); recentActions.add(`${isEditing ? 'Updated' : 'Added'} member "${name}"`, 'leadership'); } catch {}
 	}
 
 	function edit(item: Leader) { editing = item; form = { ...item } as any; showModal = true; }
@@ -50,6 +54,7 @@
 
 	async function doDelete() {
 		if (deleting) {
+			const name = deleting.name;
 			if (deleting.image.startsWith('http')) {
 				const key = extractR2Key(deleting.image);
 				if (key) await fetch('/api/upload', { method: 'DELETE', body: JSON.stringify({ key }), headers: { 'Content-Type': 'application/json' } });
@@ -57,6 +62,7 @@
 			await remove('leaders', (deleting as any).id);
 			items = items.filter((l) => (l as any).id !== (deleting as any).id);
 			deleting = null;
+			try { snackbar.send('Member deleted', 'success'); recentActions.add(`Deleted member "${name}"`, 'leadership'); } catch {}
 		}
 	}
 
@@ -81,6 +87,7 @@
 		}
 		newCat = '';
 		showCatModal = false;
+		try { snackbar.send(`Role "${trimmed}" created`, 'success'); } catch {}
 	}
 </script>
 

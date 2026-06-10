@@ -6,15 +6,15 @@
 <Reveal>
 	<section class="relative overflow-hidden bg-background">
 		<div class="relative z-10 mx-auto max-w-7xl px-6 py-20 lg:px-8 lg:py-28">
-			<p class="mb-6 text-xs font-medium tracking-widest text-primary uppercase">
-				All Kerala Self Financing Private Schools Association
+			<p class="mb-6 max-w-xl text-xs font-medium tracking-widest text-primary uppercase leading-relaxed">
+				Representing Private Schools Across Kerala as Part of the All India Private Schools Association Network
 			</p>
 
-			<h1 class="max-w-3xl text-4xl leading-tight font-semibold text-primary lg:text-5xl">
-				The Unified Voice of Self Financing Private Schools in Kerala
+			<h1 class="max-w-xl text-4xl leading-tight font-semibold text-primary lg:text-5xl">
+				Unified Voice of Self Financing Private Schools
 			</h1>
 
-			<p class="mt-6 max-w-2xl text-lg leading-relaxed text-text-muted">
+			<p class="mt-6 max-w-lg text-lg leading-relaxed text-text-muted">
 				Empowering institutions through policy advocacy, financial partnerships, teacher development
 				programs, and collective representation across the state.
 			</p>

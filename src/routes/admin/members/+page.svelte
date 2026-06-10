@@ -3,6 +3,7 @@
 	import { list, create, update, remove } from '$lib/stores/api';
 	import type { MemberInstitution } from '$lib/stores/data';
 	import { Eye, Edit3, Trash2, X, Plus } from '@lucide/svelte';
+	import { snackbar, recentActions } from '$lib/stores/snackbar';
 
 	let items = $state<MemberInstitution[]>([]);
 	let loading = $state(true);
@@ -35,7 +36,10 @@
 			const created = await create<MemberInstitution>('members', form);
 			items = [...items, created];
 		}
+		const isEditing = !!editing;
+		const name = form.name;
 		closeModal();
+		try { snackbar.send(isEditing ? 'Member updated' : 'Member added', 'success'); recentActions.add(`${isEditing ? 'Updated' : 'Added'} member "${name}"`, 'members'); } catch {}
 	}
 
 	function edit(item: MemberInstitution) { editing = item; form = { ...item } as any; showModal = true; }
@@ -43,9 +47,11 @@
 
 	async function doDelete() {
 		if (deleting) {
+			const name = deleting.name;
 			await remove('members', deleting.id);
 			items = items.filter((m) => m.id !== deleting!.id);
 			deleting = null;
+			try { snackbar.send('Member deleted', 'success'); recentActions.add(`Deleted member "${name}"`, 'members'); } catch {}
 		}
 	}
 
@@ -71,6 +77,7 @@
 		}
 		newCat = '';
 		showCatModal = false;
+		try { snackbar.send(`Category "${trimmed}" created`, 'success'); } catch {}
 	}
 </script>
 
