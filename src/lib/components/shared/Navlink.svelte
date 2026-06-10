@@ -7,7 +7,6 @@
 >
 	<a href="/about" on:click={onNavigate}>About</a>
 	<a href="/services" on:click={onNavigate}>Services</a>
-	<a href="/members" on:click={onNavigate}>Members</a>
 	<a href="/circulars" on:click={onNavigate}>Circulars</a>
 	<a href="/events" on:click={onNavigate}>Events</a>
 	<a href="/blog" on:click={onNavigate}>Blog</a>

@@ -4,7 +4,7 @@
 	import { goto } from '$app/navigation';
 	import {
 		LayoutDashboard, FileText, BookOpen, Feather,
-		Images, Users, Building2, HelpCircle, Phone,
+		Images, 		Users, HelpCircle, Phone,
 		Menu, User, Sun, Moon, FolderOpen, Gem
 	} from '@lucide/svelte';
 	import { getStoredTheme, setTheme } from '$lib/stores/theme';
@@ -40,7 +40,6 @@
 		{ href: '/admin/services', label: 'Services', icon: Gem },
 		{ href: '/admin/files', label: 'Files', icon: FolderOpen },
 		{ href: '/admin/leadership', label: 'Leadership', icon: Users },
-		{ href: '/admin/members', label: 'Members', icon: Building2 },
 		{ href: '/admin/faq', label: 'FAQ', icon: HelpCircle },
 		{ href: '/admin/contact', label: 'Contact', icon: Phone }
 	];

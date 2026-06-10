@@ -3,7 +3,7 @@
 	import { list } from '$lib/stores/api';
 	import {
 		FileText, BookOpen, Images,
-		Users, Building2, Feather, HelpCircle, FolderOpen, Gem,
+		Users, Feather, HelpCircle, FolderOpen, Gem,
 		Eye, TrendingUp, BarChart3
 	} from '@lucide/svelte';
 	import LineChart from '$lib/components/admin/LineChart.svelte';
@@ -23,7 +23,7 @@
 	let counts = $state<Record<string, number>>({});
 
 	onMount(async () => {
-		const entities = ['circulars', 'courses', 'blog', 'services', 'gallery', 'leaders', 'members', 'faqs', 'files'];
+		const entities = ['circulars', 'courses', 'blog', 'services', 'gallery', 'leaders', 'faqs', 'files'];
 		const results = await Promise.all(entities.map(e => list(e).then(d => [e, d.length]).catch(() => [e, 0])));
 		counts = Object.fromEntries(results);
 	});
@@ -35,7 +35,6 @@
 		{ label: 'Services', value: counts['services'] ?? 0, icon: Gem, href: '/admin/services', color: 'border-l-pink-500' },
 		{ label: 'Gallery Albums', value: counts['gallery'] ?? 0, icon: Images, href: '/admin/gallery', color: 'border-l-amber-500' },
 		{ label: 'Leadership', value: counts['leaders'] ?? 0, icon: Users, href: '/admin/leadership', color: 'border-l-violet-500' },
-		{ label: 'Members', value: counts['members'] ?? 0, icon: Building2, href: '/admin/members', color: 'border-l-cyan-500' },
 		{ label: 'FAQs', value: counts['faqs'] ?? 0, icon: HelpCircle, href: '/admin/faq', color: 'border-l-orange-500' },
 		{ label: 'Files', value: counts['files'] ?? 0, icon: FolderOpen, href: '/admin/files', color: 'border-l-teal-500' }
 	];

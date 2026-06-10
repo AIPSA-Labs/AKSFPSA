@@ -41,7 +41,6 @@
 
 				<ul class="mt-6 space-y-3 text-sm text-text-muted">
 					<li><a href="/leadership" class="hover:text-primary">Executive Committee</a></li>
-					<li><a href="/members" class="hover:text-primary">Member Institutions</a></li>
 					<li><a href="/gallery" class="hover:text-primary">Gallery</a></li>
 					<li><a href="/contact" class="hover:text-primary">Contact</a></li>
 				</ul>

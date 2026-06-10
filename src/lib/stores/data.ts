@@ -74,14 +74,6 @@ export type Leader = {
 	group: 'office-bearers' | 'executive-members';
 };
 
-export type MemberInstitution = {
-	id: number;
-	name: string;
-	district: string;
-	category: string;
-	since: string;
-};
-
 export type MembershipPlan = {
 	title: string;
 	fee: string;
@@ -205,13 +197,6 @@ export const DEFAULT_LEADERS: Leader[] = [
 	{ name: 'Mrs. Deepa Menon', role: 'Executive Member', district: 'Kannur', image: '', group: 'executive-members' },
 	{ name: 'Mr. Faisal Ahmed', role: 'Executive Member', district: 'Palakkad', image: '', group: 'executive-members' },
 	{ name: 'Mrs. Lakshmi Pillai', role: 'Executive Member', district: 'Kollam', image: '', group: 'executive-members' }
-];
-
-export const DEFAULT_MEMBERS: MemberInstitution[] = [
-	{ id: 1, name: 'Green Valley Higher Secondary School', district: 'Kozhikode', category: 'Recognized', since: '2022' },
-	{ id: 2, name: 'Al Noor Public School', district: 'Malappuram', category: 'Associate', since: '2023' },
-	{ id: 3, name: 'St. Thomas Academy', district: 'Ernakulam', category: 'Recognized', since: '2021' },
-	{ id: 4, name: 'Modern Scholars School', district: 'Thrissur', category: 'Recognized', since: '2024' }
 ];
 
 export const DEFAULT_PLANS: MembershipPlan[] = [
