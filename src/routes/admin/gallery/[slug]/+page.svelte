@@ -19,6 +19,9 @@
 	let pendingImages: (GalleryImage & { uploading?: boolean })[] = $state([]);
 
 	let deletingImageId = $state<number | null>(null);
+	let savingEdit = $state(false);
+	let deletingAlbum = $state(false);
+	let deletingImageLoading = $state(false);
 
 	onMount(async () => {
 		try {
@@ -37,21 +40,27 @@
 
 	async function saveEdit() {
 		if (!album) return;
-		const data = { ...editForm };
-		const updated = await update<GalleryAlbum>('gallery', album.id, data);
-		album = updated;
-		showEditModal = false;
-		snackbar.send('Album updated', 'success');
-		recentActions.add(`Updated album "${album.title}"`, 'gallery');
+		savingEdit = true;
+		try {
+			const data = { ...editForm };
+			const updated = await update<GalleryAlbum>('gallery', album.id, data);
+			album = updated;
+			showEditModal = false;
+			snackbar.send('Album updated', 'success');
+			recentActions.add(`Updated album "${album.title}"`, 'gallery');
+		} finally { savingEdit = false; }
 	}
 
 	async function deleteAlbum() {
 		if (!album) return;
-		const title = album.title;
-		await remove('gallery', album.id);
-		snackbar.send(`Album "${title}" deleted`, 'success');
-		recentActions.add(`Deleted album "${title}"`, 'gallery');
-		goto('/admin/gallery');
+		deletingAlbum = true;
+		try {
+			const title = album.title;
+			await remove('gallery', album.id);
+			snackbar.send(`Album "${title}" deleted`, 'success');
+			recentActions.add(`Deleted album "${title}"`, 'gallery');
+			goto('/admin/gallery');
+		} finally { deletingAlbum = false; }
 	}
 
 	async function handlePendingUpload(e: Event) {
@@ -123,10 +132,12 @@
 
 	async function doDeleteImage() {
 		if (!album || deletingImageId === null) return;
-		await remove('gallery-images', deletingImageId);
-		album = { ...album, images: album.images.filter((i) => i.id !== deletingImageId) };
-		snackbar.send('Image deleted', 'success');
-		deletingImageId = null;
+		deletingImageLoading = true;
+		try {
+			await remove('gallery-images', deletingImageId);
+			album = { ...album, images: album.images.filter((i) => i.id !== deletingImageId) };
+			snackbar.send('Image deleted', 'success');
+		} finally { deletingImageId = null; deletingImageLoading = false; }
 	}
 </script>
 
@@ -274,7 +285,7 @@
 				</div>
 				<div class="mt-6 flex justify-end gap-3">
 					<button onclick={() => showEditModal = false} class="rounded-lg border border-border px-4 py-2 text-sm text-text-muted">Cancel</button>
-					<button onclick={saveEdit} class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white">Save</button>
+					<button onclick={saveEdit} disabled={savingEdit} class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white disabled:opacity-50">{#if savingEdit}<LoaderCircle size={14} class="inline animate-spin" />{:else}Save{/if}</button>
 				</div>
 			</div>
 		</div>
@@ -288,7 +299,7 @@
 				<p class="mt-2 text-sm text-text-muted">Are you sure you want to delete "{album.title}" and all its images?</p>
 				<div class="mt-6 flex justify-end gap-3">
 					<button onclick={() => showDeleteConfirm = false} class="rounded-lg border border-border px-4 py-2 text-sm text-text-muted">Cancel</button>
-					<button onclick={deleteAlbum} class="rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white">Delete</button>
+					<button onclick={deleteAlbum} disabled={deletingAlbum} class="rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white disabled:opacity-50">{#if deletingAlbum}<LoaderCircle size={14} class="inline animate-spin" />{:else}Delete{/if}</button>
 				</div>
 			</div>
 		</div>
@@ -302,7 +313,7 @@
 				<p class="mt-2 text-sm text-text-muted">Are you sure you want to remove this image?</p>
 				<div class="mt-6 flex justify-end gap-3">
 					<button onclick={() => deletingImageId = null} class="rounded-lg border border-border px-4 py-2 text-sm text-text-muted">Cancel</button>
-					<button onclick={doDeleteImage} class="rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white">Delete</button>
+					<button onclick={doDeleteImage} disabled={deletingImageLoading} class="rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white disabled:opacity-50">{#if deletingImageLoading}<LoaderCircle size={14} class="inline animate-spin" />{:else}Delete{/if}</button>
 				</div>
 			</div>
 		</div>

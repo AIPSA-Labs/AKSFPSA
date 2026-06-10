@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { list, create, update, remove } from '$lib/stores/api';
 	import type { GalleryAlbum } from '$lib/stores/data';
-	import { Plus, Image as ImageIcon, MoreVertical, Pencil, Trash2 } from '@lucide/svelte';
+	import { Plus, Image as ImageIcon, MoreVertical, Pencil, Trash2, LoaderCircle } from '@lucide/svelte';
 	import { goto } from '$app/navigation';
 	import { snackbar, recentActions } from '$lib/stores/snackbar';
 
@@ -22,6 +22,8 @@
 	let newCat = $state('');
 
 	let deleteTarget = $state<Category | null>(null);
+	let savingCat = $state(false);
+	let deletingCat = $state(false);
 
 	async function loadCategories() {
 		try {
@@ -63,6 +65,7 @@
 	async function saveCategory() {
 		const trimmed = newCat.trim();
 		if (!trimmed) return;
+		savingCat = true;
 
 		try {
 			if (editCat) {
@@ -82,10 +85,12 @@
 		newCat = '';
 		editCat = null;
 		showCatModal = false;
+		savingCat = false;
 	}
 
 	async function confirmDelete() {
 		if (!deleteTarget) return;
+		deletingCat = true;
 		try {
 			await remove('gallery-categories', deleteTarget.id);
 			snackbar.send(`Category "${deleteTarget.name}" deleted`, 'success');
@@ -96,6 +101,7 @@
 			snackbar.send('Failed to delete category', 'error');
 		}
 		deleteTarget = null;
+		deletingCat = false;
 	}
 
 	const filtered = $derived(
@@ -152,6 +158,21 @@
 	<div class="fixed inset-0 z-40" onclick={closeDropdown}></div>
 {/if}
 
+{#if loading}
+	<div class="mt-6 grid gap-5 sm:grid-cols-2 md:grid-cols-3">
+		{#each Array(6) as _}
+			<div class="rounded-xl border border-border bg-surface p-4">
+				<div class="mb-3 h-40 animate-pulse rounded-lg bg-background"></div>
+				<div class="h-4 w-3/4 animate-pulse rounded bg-background"></div>
+				<div class="mt-2 h-3 w-1/2 animate-pulse rounded bg-background"></div>
+				<div class="mt-2 flex gap-2">
+					<div class="h-5 w-16 animate-pulse rounded-md bg-background"></div>
+					<div class="h-5 w-12 animate-pulse rounded-md bg-background"></div>
+				</div>
+			</div>
+		{/each}
+	</div>
+{:else}
 <div class="mt-6 grid gap-5 sm:grid-cols-2 md:grid-cols-3">
 	{#each filtered as item}
 		<div class="cursor-pointer rounded-xl border border-border bg-surface p-4 transition hover:shadow-md" onclick={() => goto(`/admin/gallery/${item.slug}`)}>
@@ -174,6 +195,7 @@
 		<div class="col-span-full py-10 text-center text-text-muted">No albums found</div>
 	{/if}
 </div>
+{/if}
 
 <!-- Create / Edit Category Modal -->
 {#if showCatModal}
@@ -188,7 +210,7 @@
 			</div>
 			<div class="mt-6 flex justify-end gap-3">
 				<button onclick={() => { showCatModal = false; editCat = null; newCat = ''; }} class="rounded-lg border border-border px-4 py-2 text-sm text-text-muted">Cancel</button>
-				<button onclick={saveCategory} disabled={!newCat.trim()} class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white disabled:opacity-50">{editCat ? 'Update' : 'Save'}</button>
+				<button onclick={saveCategory} disabled={!newCat.trim() || savingCat} class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white disabled:opacity-50">{#if savingCat}<LoaderCircle size={14} class="inline animate-spin" />{:else}{editCat ? 'Update' : 'Save'}{/if}</button>
 			</div>
 		</div>
 	</div>
@@ -202,7 +224,7 @@
 			<p class="mt-2 text-sm text-text-muted">Are you sure you want to delete "{deleteTarget.name}"? {albumCountByCat[deleteTarget.name] ? `This will NOT remove ${albumCountByCat[deleteTarget.name]} album(s) using it.` : ''}</p>
 			<div class="mt-6 flex justify-end gap-3">
 				<button onclick={() => deleteTarget = null} class="rounded-lg border border-border px-4 py-2 text-sm text-text-muted">Cancel</button>
-				<button onclick={confirmDelete} class="rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600">Delete</button>
+				<button onclick={confirmDelete} disabled={deletingCat} class="rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600 disabled:opacity-50">{#if deletingCat}<LoaderCircle size={14} class="inline animate-spin" />{:else}Delete{/if}</button>
 			</div>
 		</div>
 	</div>

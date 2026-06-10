@@ -3,11 +3,13 @@
 	import { list, create, update, remove } from '$lib/stores/api';
 	import type { FAQ } from '$lib/stores/data';
 	import TipTap from '$lib/components/admin/TipTap.svelte';
-	import { X, Plus } from '@lucide/svelte';
+	import { X, Plus, LoaderCircle } from '@lucide/svelte';
 	import { snackbar, recentActions } from '$lib/stores/snackbar';
 
 	let faqs = $state<FAQ[]>([]);
 	let loading = $state(true);
+	let savingFaq = $state(false);
+	let deletingFaq = $state<number | null>(null);
 
 	let selected = $state<{ id: number; faq: FAQ } | null>(null);
 
@@ -37,25 +39,31 @@
 	}
 
 	async function saveFAQ() {
-		if (editingFAQId !== null) {
-			const updated = await update<FAQ>('faqs', editingFAQId, faqForm);
-			faqs = faqs.map((f) => ((f as any).id === editingFAQId ? updated : f));
-			if (selected && selected.id === editingFAQId) {
-				selected = { id: selected.id, faq: updated };
+		savingFaq = true;
+		try {
+			if (editingFAQId !== null) {
+				const updated = await update<FAQ>('faqs', editingFAQId, faqForm);
+				faqs = faqs.map((f) => ((f as any).id === editingFAQId ? updated : f));
+				if (selected && selected.id === editingFAQId) {
+					selected = { id: selected.id, faq: updated };
+				}
+			} else {
+				const created = await create<FAQ>('faqs', faqForm);
+				faqs = [...faqs, created];
 			}
-		} else {
-			const created = await create<FAQ>('faqs', faqForm);
-			faqs = [...faqs, created];
-		}
-		showEditModal = false;
-		try { snackbar.send(editingFAQId !== null ? 'FAQ updated' : 'FAQ created', 'success'); recentActions.add(`${editingFAQId !== null ? 'Updated' : 'Created'} FAQ`, 'faqs'); } catch {}
+			showEditModal = false;
+			try { snackbar.send(editingFAQId !== null ? 'FAQ updated' : 'FAQ created', 'success'); recentActions.add(`${editingFAQId !== null ? 'Updated' : 'Created'} FAQ`, 'faqs'); } catch {}
+		} finally { savingFaq = false; }
 	}
 
 	async function removeFAQ(id: number) {
-		await remove('faqs', id);
-		faqs = faqs.filter((f) => (f as any).id !== id);
-		selected = null;
-		try { snackbar.send('FAQ deleted', 'success'); recentActions.add('Deleted FAQ', 'faqs'); } catch {}
+		deletingFaq = id;
+		try {
+			await remove('faqs', id);
+			faqs = faqs.filter((f) => (f as any).id !== id);
+			selected = null;
+			try { snackbar.send('FAQ deleted', 'success'); recentActions.add('Deleted FAQ', 'faqs'); } catch {}
+		} finally { deletingFaq = null; }
 	}
 
 	function createFAQ() { openEdit(null); }
@@ -105,7 +113,7 @@
 			</div>
 			<div class="flex justify-end gap-3 border-t border-border px-5 py-4">
 				<button onclick={() => { const s = selected!; const id = s.id; selected = null; openEdit(id); }} class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-primary-hover">Update</button>
-				<button onclick={() => { const s = selected!; removeFAQ(s.id); }} class="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-100">Delete</button>
+				<button onclick={() => { const s = selected!; removeFAQ(s.id); }} disabled={deletingFaq === s.id} class="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-100 disabled:opacity-50">{#if deletingFaq === s.id}<LoaderCircle size={14} class="inline animate-spin" /> Deleting...{:else}Delete{/if}</button>
 			</div>
 		</div>
 	</div>
@@ -128,7 +136,7 @@
 			</div>
 			<div class="mt-6 flex justify-end gap-3">
 				<button onclick={() => showEditModal = false} class="rounded-lg border border-border px-4 py-2 text-sm text-text-muted">Cancel</button>
-				<button onclick={saveFAQ} class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white">Save</button>
+				<button onclick={saveFAQ} disabled={savingFaq} class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white disabled:opacity-50">{#if savingFaq}<LoaderCircle size={16} class="inline animate-spin" /> Saving...{:else}Save{/if}</button>
 			</div>
 		</div>
 	</div>

@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { list, create, remove } from '$lib/stores/api';
 	import type { UploadedFile } from '$lib/stores/data';
-	import { Upload, Trash2, Download, Copy, X, File, FileImage, FileText, FolderOpen } from '@lucide/svelte';
+	import { Upload, Trash2, Download, Copy, X, File, FileImage, FileText, FolderOpen, LoaderCircle } from '@lucide/svelte';
 	import { snackbar, recentActions } from '$lib/stores/snackbar';
 
 	let items = $state<UploadedFile[]>([]);
@@ -14,6 +14,8 @@
 	let deleting = $state<UploadedFile | null>(null);
 	let pendingFiles: { name: string; type: string; size: number; data: string }[] = $state([]);
 	let uploadError = $state('');
+	let uploadingFiles = $state(false);
+	let deletingFileLoading = $state(false);
 
 	const fileTypes = ['All', 'Images', 'PDFs', 'Documents', 'Others'];
 
@@ -81,21 +83,24 @@
 
 	async function doUpload() {
 		if (pendingFiles.length === 0) return;
-		const count = pendingFiles.length;
-		const date = new Date().toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' });
-		for (const pf of pendingFiles) {
-			const created = await create<UploadedFile>('files', {
-				name: pf.name,
-				type: pf.type,
-				size: pf.size,
-				data: pf.data,
-				date
-			});
-			items = [...items, created];
-		}
-		pendingFiles = [];
-		showUploadModal = false;
-		try { snackbar.send(`${count} file(s) uploaded`, 'success'); recentActions.add(`Uploaded ${count} file(s)`, 'files'); } catch {}
+		uploadingFiles = true;
+		try {
+			const count = pendingFiles.length;
+			const date = new Date().toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' });
+			for (const pf of pendingFiles) {
+				const created = await create<UploadedFile>('files', {
+					name: pf.name,
+					type: pf.type,
+					size: pf.size,
+					data: pf.data,
+					date
+				});
+				items = [...items, created];
+			}
+			pendingFiles = [];
+			showUploadModal = false;
+			try { snackbar.send(`${count} file(s) uploaded`, 'success'); recentActions.add(`Uploaded ${count} file(s)`, 'files'); } catch {}
+		} finally { uploadingFiles = false; }
 	}
 
 	function closeUploadModal() {
@@ -129,16 +134,19 @@
 
 	async function doDelete() {
 		if (!deleting) return;
-		const name = deleting.name;
-		if (deleting.data.startsWith('http')) {
-			const key = extractR2Key(deleting.data);
-			if (key) await fetch('/api/upload', { method: 'DELETE', body: JSON.stringify({ key }), headers: { 'Content-Type': 'application/json' } });
-		}
-		await remove('files', deleting.id);
-		items = items.filter((f) => f.id !== deleting!.id);
-		if (selected?.id === deleting!.id) selected = null;
-		deleting = null;
-		try { snackbar.send('File deleted', 'success'); recentActions.add(`Deleted file "${name}"`, 'files'); } catch {}
+		deletingFileLoading = true;
+		try {
+			const name = deleting.name;
+			if (deleting.data.startsWith('http')) {
+				const key = extractR2Key(deleting.data);
+				if (key) await fetch('/api/upload', { method: 'DELETE', body: JSON.stringify({ key }), headers: { 'Content-Type': 'application/json' } });
+			}
+			await remove('files', deleting.id);
+			items = items.filter((f) => f.id !== deleting!.id);
+			if (selected?.id === deleting!.id) selected = null;
+			deleting = null;
+			try { snackbar.send('File deleted', 'success'); recentActions.add(`Deleted file "${name}"`, 'files'); } catch {}
+		} finally { deletingFileLoading = false; }
 	}
 
 	function openDetail(file: UploadedFile) {
@@ -225,7 +233,7 @@
 				</div>
 				<div class="mt-6 flex justify-end gap-3">
 					<button onclick={closeUploadModal} class="rounded-lg border border-border px-4 py-2 text-sm text-text-muted">Cancel</button>
-					<button onclick={doUpload} class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white">Upload {pendingFiles.length} file(s)</button>
+					<button onclick={doUpload} disabled={uploadingFiles} class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white disabled:opacity-50">{#if uploadingFiles}<LoaderCircle size={14} class="inline animate-spin" />{:else}Upload {pendingFiles.length} file(s){/if}</button>
 				</div>
 			{/if}
 		</div>
@@ -278,7 +286,7 @@
 			<p class="mt-2 text-sm text-text-muted">Are you sure you want to delete "{deleting.name}"?</p>
 			<div class="mt-6 flex justify-end gap-3">
 				<button onclick={() => deleting = null} class="rounded-lg border border-border px-4 py-2 text-sm text-text-muted">Cancel</button>
-				<button onclick={doDelete} class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white">Delete</button>
+				<button onclick={doDelete} disabled={deletingFileLoading} class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50">{#if deletingFileLoading}<LoaderCircle size={14} class="inline animate-spin" />{:else}Delete{/if}</button>
 			</div>
 		</div>
 	</div>

@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { list, create, update, remove } from '$lib/stores/api';
 	import type { MemberInstitution } from '$lib/stores/data';
-	import { Eye, Edit3, Trash2, X, Plus } from '@lucide/svelte';
+	import { Eye, Edit3, Trash2, X, Plus, LoaderCircle } from '@lucide/svelte';
 	import { snackbar, recentActions } from '$lib/stores/snackbar';
 
 	let items = $state<MemberInstitution[]>([]);
@@ -11,6 +11,7 @@
 	let showModal = $state(false);
 	let editing = $state<MemberInstitution | null>(null);
 	let deleting = $state<MemberInstitution | null>(null);
+	let deletingLoading = $state(false);
 	let selected = $state<MemberInstitution | null>(null);
 
 	let form = $state({ id: 0, name: '', district: '', category: 'Recognized', since: '' });
@@ -47,11 +48,14 @@
 
 	async function doDelete() {
 		if (deleting) {
-			const name = deleting.name;
-			await remove('members', deleting.id);
-			items = items.filter((m) => m.id !== deleting!.id);
-			deleting = null;
-			try { snackbar.send('Member deleted', 'success'); recentActions.add(`Deleted member "${name}"`, 'members'); } catch {}
+			deletingLoading = true;
+			try {
+				const name = deleting.name;
+				await remove('members', deleting.id);
+				items = items.filter((m) => m.id !== deleting!.id);
+				deleting = null;
+				try { snackbar.send('Member deleted', 'success'); recentActions.add(`Deleted member "${name}"`, 'members'); } catch {}
+			} finally { deletingLoading = false; }
 		}
 	}
 
@@ -196,7 +200,7 @@
 			<p class="mt-2 text-sm text-text-muted">Are you sure you want to delete "{deleting.name}"?</p>
 			<div class="mt-6 flex justify-end gap-3">
 				<button onclick={() => deleting = null} class="rounded-lg border border-border px-4 py-2 text-sm text-text-muted">Cancel</button>
-				<button onclick={doDelete} class="rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white">Delete</button>
+				<button onclick={doDelete} disabled={deletingLoading} class="rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white disabled:opacity-50">{#if deletingLoading}<LoaderCircle size={16} class="inline animate-spin" /> Deleting...{:else}Delete{/if}</button>
 			</div>
 		</div>
 	</div>

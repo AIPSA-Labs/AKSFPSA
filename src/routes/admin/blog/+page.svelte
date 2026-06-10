@@ -2,13 +2,15 @@
 	import { onMount } from 'svelte';
 	import { list, update, remove } from '$lib/stores/api';
 	import type { BlogPost } from '$lib/stores/data';
-	import { Eye, Edit3, Trash2, X, Plus } from '@lucide/svelte';
+	import { Eye, Edit3, Trash2, X, Plus, LoaderCircle } from '@lucide/svelte';
 	import { snackbar, recentActions } from '$lib/stores/snackbar';
 
 	let items = $state<BlogPost[]>([]);
 	let loading = $state(true);
 	let search = $state('');
 	let deleting = $state<BlogPost | null>(null);
+	let deletingLoading = $state(false);
+	let togglingStatus = $state<number | null>(null);
 	let selected = $state<BlogPost | null>(null);
 	let statusFilter = $state<'all' | 'draft' | 'published'>('all');
 	let typeFilter = $state<'all' | 'post' | 'event'>('all');
@@ -49,20 +51,26 @@
 
 	async function doDelete() {
 		if (deleting) {
-			const title = deleting.title;
-			await remove('blog', deleting.id);
-			items = items.filter((b) => b.id !== deleting!.id);
-			deleting = null;
-			try { snackbar.send('Post deleted', 'success'); recentActions.add(`Deleted post "${title}"`, 'blog'); } catch {}
+			deletingLoading = true;
+			try {
+				const title = deleting.title;
+				await remove('blog', deleting.id);
+				items = items.filter((b) => b.id !== deleting!.id);
+				deleting = null;
+				try { snackbar.send('Post deleted', 'success'); recentActions.add(`Deleted post "${title}"`, 'blog'); } catch {}
+			} finally { deletingLoading = false; }
 		}
 	}
 
 	async function toggleStatus(item: BlogPost) {
-		const newStatus = item.status === 'published' ? 'draft' : 'published';
-		const updated = await update<BlogPost>('blog', item.id, { status: newStatus });
-		items = items.map((b) => (b.id === item.id ? updated : b));
-		if (selected?.id === item.id) selected = updated;
-		try { snackbar.send(`Post "${item.title}" ${newStatus}`, 'success'); recentActions.add(`${newStatus === 'published' ? 'Published' : 'Drafted'} post "${item.title}"`, 'blog'); } catch {}
+		togglingStatus = item.id;
+		try {
+			const newStatus = item.status === 'published' ? 'draft' : 'published';
+			const updated = await update<BlogPost>('blog', item.id, { status: newStatus });
+			items = items.map((b) => (b.id === item.id ? updated : b));
+			if (selected?.id === item.id) selected = updated;
+			try { snackbar.send(`Post "${item.title}" ${newStatus}`, 'success'); recentActions.add(`${newStatus === 'published' ? 'Published' : 'Drafted'} post "${item.title}"`, 'blog'); } catch {}
+		} finally { togglingStatus = null; }
 	}
 </script>
 
@@ -115,9 +123,9 @@
 						</span>
 					</td>
 					<td class="hidden px-4 py-3 md:table-cell">
-						<button onclick={(e) => { e.stopPropagation(); toggleStatus(item); }}
-							class="rounded-md px-2 py-0.5 text-xs font-medium {item.status === 'published' ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-amber-100 text-amber-700 hover:bg-amber-200'}">
-							{item.status}
+						<button onclick={(e) => { e.stopPropagation(); toggleStatus(item); }} disabled={togglingStatus === item.id}
+							class="rounded-md px-2 py-0.5 text-xs font-medium disabled:opacity-50 {item.status === 'published' ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-amber-100 text-amber-700 hover:bg-amber-200'}">
+							{togglingStatus === item.id ? '...' : item.status}
 						</button>
 					</td>
 					<td class="hidden px-4 py-3 text-text-muted sm:table-cell">{item.date}</td>
@@ -165,7 +173,7 @@
 			<p class="mt-2 text-sm text-text-muted">Are you sure you want to delete "{deleting.title}"?</p>
 			<div class="mt-6 flex justify-end gap-3">
 				<button onclick={() => deleting = null} class="rounded-lg border border-border px-4 py-2 text-sm text-text-muted">Cancel</button>
-				<button onclick={doDelete} class="rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white">Delete</button>
+				<button onclick={doDelete} disabled={deletingLoading} class="rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white disabled:opacity-50">{#if deletingLoading}<LoaderCircle size={16} class="inline animate-spin" /> Deleting...{:else}Delete{/if}</button>
 			</div>
 		</div>
 	</div>
@@ -197,9 +205,9 @@
 					<span class="rounded-md px-2.5 py-0.5 text-xs font-medium {selected.type === 'event' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'}">
 						{selected.type === 'event' ? 'Event' : 'Post'}
 					</span>
-					<button onclick={(e) => { e.stopPropagation(); toggleStatus(selected!); }}
-						class="rounded-md px-2.5 py-0.5 text-xs font-medium {selected.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}">
-						{selected.status}
+					<button onclick={(e) => { e.stopPropagation(); toggleStatus(selected!); }} disabled={togglingStatus === selected.id}
+						class="rounded-md px-2.5 py-0.5 text-xs font-medium disabled:opacity-50 {selected.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}">
+						{togglingStatus === selected.id ? '...' : selected.status}
 					</button>
 					<span class="text-text-muted">{selected.date}</span>
 				</div>

@@ -3,12 +3,13 @@
 	import { goto } from '$app/navigation';
 	import { list, update, remove } from '$lib/stores/api';
 	import type { Service } from '$lib/stores/data';
-	import { Edit3, Trash2, X } from '@lucide/svelte';
+	import { Edit3, Trash2, X, LoaderCircle } from '@lucide/svelte';
 	import { snackbar, recentActions } from '$lib/stores/snackbar';
 
 	let items = $state<Service[]>([]);
 	let loading = $state(true);
 	let deleting = $state<Service | null>(null);
+	let deletingLoading = $state(false);
 	let selected = $state<Service | null>(null);
 
 	onMount(async () => {
@@ -25,11 +26,14 @@
 
 	async function doDelete() {
 		if (deleting) {
-			const title = deleting.title;
-			await remove('services', deleting.id);
-			items = items.filter((s) => s.id !== deleting!.id);
-			deleting = null;
-			try { snackbar.send('Service deleted', 'success'); recentActions.add(`Deleted service "${title}"`, 'services'); } catch {}
+			deletingLoading = true;
+			try {
+				const title = deleting.title;
+				await remove('services', deleting.id);
+				items = items.filter((s) => s.id !== deleting!.id);
+				deleting = null;
+				try { snackbar.send('Service deleted', 'success'); recentActions.add(`Deleted service "${title}"`, 'services'); } catch {}
+			} finally { deletingLoading = false; }
 		}
 	}
 
@@ -92,7 +96,7 @@
 			<p class="mt-2 text-sm text-text-muted">Are you sure you want to delete "{deleting.title}"?</p>
 			<div class="mt-6 flex justify-end gap-3">
 				<button onclick={() => deleting = null} class="rounded-lg border border-border px-4 py-2 text-sm text-text-muted">Cancel</button>
-				<button onclick={doDelete} class="rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white">Delete</button>
+				<button onclick={doDelete} disabled={deletingLoading} class="rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white disabled:opacity-50">{#if deletingLoading}<LoaderCircle size={16} class="inline animate-spin" /> Deleting...{:else}Delete{/if}</button>
 			</div>
 		</div>
 	</div>

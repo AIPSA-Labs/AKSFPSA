@@ -30,6 +30,7 @@
 	let coverFile = $state<{ file: File; preview: string; compressed: Blob | null } | null>(null);
 	let showCatModal = $state(false);
 	let newCat = $state('');
+	let catSaving = $state(false);
 
 	let showCalendar = $state(false);
 	let calMonth = $state(new Date().getMonth());
@@ -67,6 +68,7 @@
 	async function addCategory() {
 		const trimmed = newCat.trim();
 		if (!trimmed) return;
+		catSaving = true;
 		try {
 			await create('gallery-categories', { name: trimmed });
 			const cats = await list<Category>('gallery-categories');
@@ -78,6 +80,7 @@
 		}
 		newCat = '';
 		showCatModal = false;
+		catSaving = false;
 	}
 
 	async function removeR2File(key: string) {
@@ -428,7 +431,7 @@
 			</div>
 			<div class="mt-6 flex justify-end gap-3">
 				<button onclick={() => { showCatModal = false; newCat = ''; }} class="rounded-lg border border-border px-4 py-2 text-sm text-text-muted">Cancel</button>
-				<button onclick={addCategory} disabled={!newCat.trim()} class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white disabled:opacity-50">Save</button>
+				<button onclick={addCategory} disabled={!newCat.trim() || catSaving} class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white disabled:opacity-50">{#if catSaving}<LoaderCircle size={14} class="inline animate-spin" />{:else}Save{/if}</button>
 			</div>
 		</div>
 	</div>

@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { list, create, update, remove } from '$lib/stores/api';
 	import type { Leader } from '$lib/stores/data';
-	import { Eye, Edit3, Trash2, X, Plus } from '@lucide/svelte';
+	import { Eye, Edit3, Trash2, X, Plus, LoaderCircle } from '@lucide/svelte';
 	import { snackbar, recentActions } from '$lib/stores/snackbar';
 
 	let items = $state<Leader[]>([]);
@@ -10,6 +10,7 @@
 	let showModal = $state(false);
 	let editing = $state<Leader | null>(null);
 	let deleting = $state<Leader | null>(null);
+	let deletingLoading = $state(false);
 	let selected = $state<Leader | null>(null);
 
 	let form = $state({ name: '', role: '', district: '', image: '', group: 'office-bearers' });
@@ -54,15 +55,18 @@
 
 	async function doDelete() {
 		if (deleting) {
-			const name = deleting.name;
-			if (deleting.image.startsWith('http')) {
-				const key = extractR2Key(deleting.image);
-				if (key) await fetch('/api/upload', { method: 'DELETE', body: JSON.stringify({ key }), headers: { 'Content-Type': 'application/json' } });
-			}
-			await remove('leaders', (deleting as any).id);
-			items = items.filter((l) => (l as any).id !== (deleting as any).id);
-			deleting = null;
-			try { snackbar.send('Member deleted', 'success'); recentActions.add(`Deleted member "${name}"`, 'leadership'); } catch {}
+			deletingLoading = true;
+			try {
+				const name = deleting.name;
+				if (deleting.image.startsWith('http')) {
+					const key = extractR2Key(deleting.image);
+					if (key) await fetch('/api/upload', { method: 'DELETE', body: JSON.stringify({ key }), headers: { 'Content-Type': 'application/json' } });
+				}
+				await remove('leaders', (deleting as any).id);
+				items = items.filter((l) => (l as any).id !== (deleting as any).id);
+				deleting = null;
+				try { snackbar.send('Member deleted', 'success'); recentActions.add(`Deleted member "${name}"`, 'leadership'); } catch {}
+			} finally { deletingLoading = false; }
 		}
 	}
 
@@ -247,7 +251,7 @@
 			<p class="mt-2 text-sm text-text-muted">Are you sure you want to delete "{deleting.name}"?</p>
 			<div class="mt-6 flex justify-end gap-3">
 				<button onclick={() => deleting = null} class="rounded-lg border border-border px-4 py-2 text-sm text-text-muted">Cancel</button>
-				<button onclick={doDelete} class="rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white">Delete</button>
+				<button onclick={doDelete} disabled={deletingLoading} class="rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white disabled:opacity-50">{#if deletingLoading}<LoaderCircle size={16} class="inline animate-spin" /> Deleting...{:else}Delete{/if}</button>
 			</div>
 		</div>
 	</div>

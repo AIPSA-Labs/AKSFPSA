@@ -2,10 +2,14 @@
 	import { onMount } from 'svelte';
 	import { get, create, update, remove, list } from '$lib/stores/api';
 	import type { ContactInfo, ContactSubmission } from '$lib/stores/data';
-	import { X } from '@lucide/svelte';
+	import { X, LoaderCircle } from '@lucide/svelte';
 	import { snackbar, recentActions } from '$lib/stores/snackbar';
 
 	let info = $state<ContactInfo>({ address: '', email: '', phones: [''], hours: '' });
+	let savingInfo = $state(false);
+	let savingDetail = $state(false);
+	let deletingContact = $state(false);
+	let loadingContact = $state(true);
 	let editing = $state(false);
 	let editForm = $state<ContactInfo>({ address: '', email: '', phones: [''], hours: '' });
 
@@ -20,14 +24,19 @@
 			items = await list<ContactSubmission>('contact-submissions');
 		} catch (e) {
 			console.error('Failed to load submissions:', e);
+		} finally {
+			loadingContact = false;
 		}
 	});
 
 	async function saveInfo() {
-		const updated = await update<ContactInfo>('contact-info', 1, editForm);
-		info = updated;
-		editing = false;
-		try { snackbar.send('Contact info updated', 'success'); recentActions.add('Updated contact info', 'contact'); } catch {}
+		savingInfo = true;
+		try {
+			const updated = await update<ContactInfo>('contact-info', 1, editForm);
+			info = updated;
+			editing = false;
+			try { snackbar.send('Contact info updated', 'success'); recentActions.add('Updated contact info', 'contact'); } catch {}
+		} finally { savingInfo = false; }
 	}
 
 	function startEdit() {
@@ -79,21 +88,27 @@
 
 	async function saveDetail() {
 		if (!selected) return;
-		const s = selected;
-		const updated: ContactSubmission = { ...s, notes: detailNotes, status: s.status as ContactSubmission['status'] };
-		await update<ContactSubmission>('contact-submissions', s.id, updated);
-		items = items.map((r) => r.id === s.id ? updated : r);
-		selected = null;
-		try { snackbar.send('Enquiry updated', 'success'); } catch {}
+		savingDetail = true;
+		try {
+			const s = selected;
+			const updated: ContactSubmission = { ...s, notes: detailNotes, status: s.status as ContactSubmission['status'] };
+			await update<ContactSubmission>('contact-submissions', s.id, updated);
+			items = items.map((r) => r.id === s.id ? updated : r);
+			selected = null;
+			try { snackbar.send('Enquiry updated', 'success'); } catch {}
+		} finally { savingDetail = false; }
 	}
 
 	async function confirmDelete() {
 		if (!selected) return;
-		const id = selected.id;
-		await remove('contact-submissions', id);
-		items = items.filter((r) => r.id !== id);
-		selected = null;
-		try { snackbar.send('Enquiry deleted', 'success'); } catch {}
+		deletingContact = true;
+		try {
+			const id = selected.id;
+			await remove('contact-submissions', id);
+			items = items.filter((r) => r.id !== id);
+			selected = null;
+			try { snackbar.send('Enquiry deleted', 'success'); } catch {}
+		} finally { deletingContact = false; }
 	}
 
 	function setStatus(st: string) {
@@ -139,7 +154,7 @@
 			</div>
 			{#if editing}
 				<button onclick={() => editing = false} class="rounded-lg border border-border px-3 py-1.5 text-xs text-text-muted hover:bg-background">Cancel</button>
-				<button onclick={saveInfo} class="rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-white">Save</button>
+				<button onclick={saveInfo} disabled={savingInfo} class="rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-white disabled:opacity-50">{#if savingInfo}<LoaderCircle size={12} class="inline animate-spin" />{:else}Save{/if}</button>
 			{:else}
 				<button onclick={startEdit} class="rounded-lg border border-border px-3 py-1.5 text-xs text-text-muted hover:bg-background">Edit</button>
 			{/if}
@@ -283,10 +298,10 @@
 			</div>
 
 			<div class="flex justify-between border-t border-border px-5 py-4">
-				<button onclick={confirmDelete} class="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-100">Delete</button>
+				<button onclick={confirmDelete} disabled={deletingContact} class="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-100 disabled:opacity-50">{#if deletingContact}<LoaderCircle size={14} class="inline animate-spin" /> Deleting...{:else}Delete{/if}</button>
 				<div class="flex gap-3">
 					<button onclick={() => selected = null} class="rounded-lg border border-border px-4 py-2 text-sm text-text-muted">Cancel</button>
-					<button onclick={saveDetail} class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white">Save</button>
+					<button onclick={saveDetail} disabled={savingDetail} class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white disabled:opacity-50">{#if savingDetail}<LoaderCircle size={14} class="inline animate-spin" /> Saving...{:else}Save{/if}</button>
 				</div>
 			</div>
 		</div>
