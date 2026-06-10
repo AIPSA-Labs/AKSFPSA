@@ -4,6 +4,7 @@
 	import { list, create, update } from '$lib/stores/api';
 	import type { BlogPost } from '$lib/stores/data';
 	import TipTap from '$lib/components/admin/TipTap.svelte';
+	import DatePicker from '$lib/components/admin/DatePicker.svelte';
 	import { onMount } from 'svelte';
 	import { Check, X } from '@lucide/svelte';
 	import { snackbar, recentActions } from '$lib/stores/snackbar';
@@ -29,7 +30,8 @@
 		title: '', excerpt: '', author: 'AKSFPSA Office',
 		cover: '', content: '', tags: [] as string[],
 		status: 'draft' as 'draft' | 'published',
-		type: 'post' as 'post' | 'event'
+		type: 'post' as 'post' | 'event',
+		date: ''
 	});
 
 	let editingSlug = $state<string | null>(null);
@@ -51,7 +53,8 @@
 						content: existing.content,
 						tags: [...existing.tags],
 						status: existing.status,
-						type: existing.type
+						type: existing.type,
+						date: existing.date || ''
 					};
 				}
 			} catch (e) {
@@ -90,7 +93,7 @@
 	async function save() {
 		saving = true;
 		const slug = form.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-		const date = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+		const date = form.date || new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
 		const data = {
 			title: form.title, slug, excerpt: form.excerpt, content: form.content,
 			author: form.author, date, status: form.status, cover: form.cover,
@@ -150,6 +153,10 @@
 				<label for="excerpt" class="mb-1.5 block text-sm font-medium text-text">Excerpt / Description</label>
 				<textarea id="excerpt" bind:value={form.excerpt} rows="3" placeholder="Brief description of the post..."
 					class="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm outline-none transition focus:border-primary"></textarea>
+			</div>
+			<div>
+				<label for="date" class="mb-1.5 block text-sm font-medium text-text">Date</label>
+				<DatePicker bind:value={form.date} />
 			</div>
 		</div>
 

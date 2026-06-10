@@ -4,6 +4,7 @@
 	import { list, create, update } from '$lib/stores/api';
 	import type { Circular } from '$lib/stores/data';
 	import TipTap from '$lib/components/admin/TipTap.svelte';
+	import DatePicker from '$lib/components/admin/DatePicker.svelte';
 	import { onMount } from 'svelte';
 	import { Check } from '@lucide/svelte';
 	import { snackbar, recentActions } from '$lib/stores/snackbar';
@@ -119,8 +120,7 @@
 			</div>
 			<div>
 				<label for="date" class="mb-1.5 block text-sm font-medium text-text">Date</label>
-				<input id="date" type="text" bind:value={form.date} placeholder="e.g. 12 January 2026"
-					class="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm outline-none transition focus:border-primary" />
+				<DatePicker bind:value={form.date} placeholder="e.g. 12 January 2026" />
 			</div>
 		</div>
 
