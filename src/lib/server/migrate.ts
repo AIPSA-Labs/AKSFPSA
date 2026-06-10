@@ -127,6 +127,12 @@ const migrations = [
 		phones TEXT[] NOT NULL DEFAULT '{}',
 		hours TEXT NOT NULL DEFAULT ''
 	)`,
+	`CREATE TABLE IF NOT EXISTS admin_actions (
+		id SERIAL PRIMARY KEY,
+		text TEXT NOT NULL DEFAULT '',
+		entity TEXT NOT NULL DEFAULT '',
+		created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+	)`,
 ];
 
 export async function migrate() {

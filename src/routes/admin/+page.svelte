@@ -26,6 +26,7 @@
 		const entities = ['circulars', 'courses', 'blog', 'services', 'gallery', 'leaders', 'faqs', 'files'];
 		const results = await Promise.all(entities.map(e => list(e).then(d => [e, d.length]).catch(() => [e, 0])));
 		counts = Object.fromEntries(results);
+		recentActions.load();
 	});
 
 	const stats: StatCard[] = [
