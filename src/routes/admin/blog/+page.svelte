@@ -167,7 +167,7 @@
 {/if}
 
 {#if deleting}
-	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onclick={() => deleting = null}>
+	<div class="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4" onclick={() => deleting = null}>
 		<div class="w-full max-w-sm rounded-xl border border-border bg-surface p-6 shadow-lg" onclick={(e) => e.stopPropagation()}>
 			<h2 class="text-lg font-semibold text-text">Delete Post</h2>
 			<p class="mt-2 text-sm text-text-muted">Are you sure you want to delete "{deleting.title}"?</p>

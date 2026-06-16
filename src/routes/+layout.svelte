@@ -8,20 +8,9 @@
 	import { derived } from 'svelte/store';
 	import Breadcrumbs from '$lib/components/shared/Breadcrumbs.svelte';
 	import { fade } from 'svelte/transition';
-	import { getStoredTheme } from '$lib/stores/theme';
 	import { trackView } from '$lib/stores/analytics';
 
 	let { children } = $props();
-
-	let currentTheme = $state(getStoredTheme());
-
-	$effect(() => {
-		const observer = new MutationObserver(() => {
-			currentTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
-		});
-		observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-		return () => observer.disconnect();
-	});
 
 	const isAdmin = $derived.by(() => $page.url.pathname.startsWith('/admin'));
 
@@ -119,7 +108,7 @@
 
 	<link rel="canonical" href={$meta.url} />
 	<link rel="icon" href={favicon} />
-	<meta name="theme-color" content={currentTheme === 'dark' ? '#1a1a2e' : '#800020'} />
+	<meta name="theme-color" content="#800020" />
 	{#if $page.url.pathname !== '/'}
 		<script type="application/ld+json">
 		{JSON.stringify($breadcrumbSchema)}

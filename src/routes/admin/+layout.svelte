@@ -4,22 +4,14 @@
 	import { goto } from '$app/navigation';
 	import {
 		LayoutDashboard, FileText, BookOpen, Feather,
-		Images, 		Users, HelpCircle, Phone,
-		Menu, User, Sun, Moon, FolderOpen, Gem
+		Images, Users, HelpCircle, Phone,
+		Menu, User, FolderOpen, Gem
 	} from '@lucide/svelte';
-	import { getStoredTheme, setTheme } from '$lib/stores/theme';
 	import Snackbar from '$lib/components/admin/Snackbar.svelte';
 
 	let { children } = $props();
 
 	let sidebarOpen = $state(false);
-	let theme = $state(getStoredTheme());
-
-	function toggleAppTheme() {
-		const next = theme === 'dark' ? 'light' : 'dark';
-		setTheme(next);
-		theme = next;
-	}
 
 	function isAuthed() {
 		return typeof localStorage !== 'undefined' && localStorage.getItem('aksfpsa_admin') === 'true';
@@ -89,16 +81,6 @@
 					{item.label}
 				</a>
 			{/each}
-			<div class="mt-auto border-t border-border pt-3">
-				<button onclick={() => { toggleAppTheme(); closeSidebar(); }} class="flex w-full items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium text-text transition hover:bg-background">
-					{#if theme === 'dark'}
-						<Sun size={18} />
-					{:else}
-						<Moon size={18} />
-					{/if}
-					{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
-				</button>
-			</div>
 		</nav>
 	</aside>
 

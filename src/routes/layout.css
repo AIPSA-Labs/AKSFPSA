@@ -11,19 +11,6 @@
   --color-border: oklch(85% 0.02 85);
   --color-white: oklch(100% 0 0);
 }
-
-.dark {
-  --color-primary: oklch(72% 0.18 25);
-  --color-primary-hover: oklch(68% 0.18 25);
-  --color-background: oklch(15% 0.01 250);
-  --color-surface: oklch(20% 0.02 250);
-  --color-accent: oklch(55% 0.15 85);
-  --color-text: oklch(92% 0.01 250);
-  --color-text-muted: oklch(65% 0.02 250);
-  --color-border: oklch(30% 0.02 250);
-  --color-white: oklch(100% 0 0);
-}
-
 body,main {
   background-color: var(--color-background);
   font-family:  "Manrope", "Noto Sans Malayalam", system-ui, sans-serif;
