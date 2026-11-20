@@ -12,11 +12,13 @@
 	import MontvillePreSchoolCTA from '$lib/components/sections/MontvillePreSchoolCTA.svelte';
 	import Stats from '$lib/components/sections/Stats.svelte';
 	import TeacherInitiativesCTA from '$lib/components/sections/TeacherInitiativesCTA.svelte';
+	import Vision2047 from '$lib/components/sections/Vision2047.svelte';
 </script>
 
 <Hero />
 <Stats />
 <Gallery />
+<Vision2047 />
 <MembershipBenefit />
 <MembershipPlans />
 <Courses />

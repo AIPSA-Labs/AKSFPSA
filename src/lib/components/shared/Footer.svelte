@@ -85,6 +85,11 @@
 							<ExternalLink size={EDUCATOR_CTA_CONSTANTS.ICON_SIZE_SM} />
 						</a>
 					</li>
+					<li>
+						<a href="/#vision-2047" class="hover:text-primary">
+							<span>{STRINGS.FOOTER_VISION_2047}</span>
+						</a>
+					</li>
 				</ul>
 			</div>
 

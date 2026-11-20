@@ -84,12 +84,60 @@ export const STRINGS = {
 	MONTVILLE_FOOTER_NOTE:
 		'Want to start a preschool wing or improve your kindergarten classes? Visit the Montville portal to get started.',
 
+	//- Vision 2047: Vikasit Bharat Section
+	VISION_2047_TAG: 'National Education Mission',
+	VISION_2047_TITLE: 'Vision 2047: Vikasit Bharat',
+	VISION_2047_SUBTITLE:
+		'A nationwide mission celebrating 100 years of Indian independence by building world-class school education, creating teacher opportunities, and supporting private institutions across Kerala and India.',
+	VISION_2047_LOGO_ALT: 'Vikasit Bharat Mission 2047 - Celebrating 100 Years of Independence',
+	VISION_2047_LOGO_URL:
+		'https://storage.allindiateachersfederation.com/uploads/2026/11/vikasit-bharat-mission-2047-logo.jpg',
+	VISION_2047_CARD_BADGE: 'National Education Mission',
+
+	//- Vision 2047 Card 1
+	VISION_2047_CARD1_CATEGORY: 'Early Childhood Education',
+	VISION_2047_CARD1_STAT: '10,000',
+	VISION_2047_CARD1_TITLE: 'Pre-Schools Nationwide',
+	VISION_2047_CARD1_DESC:
+		'Setting up 10,000 joyful, high-quality preschools across urban and rural communities to give young children a strong start.',
+
+	//- Vision 2047 Card 2
+	VISION_2047_CARD2_CATEGORY: 'Career Growth',
+	VISION_2047_CARD2_STAT: '1 Lakh',
+	VISION_2047_CARD2_TITLE: 'New Teaching Opportunities',
+	VISION_2047_CARD2_DESC:
+		'Creating one lakh rewarding job opportunities for qualified teachers, school leaders, and early learning educators.',
+
+	//- Vision 2047 Card 3
+	VISION_2047_CARD3_CATEGORY: 'Community & Solidarity',
+	VISION_2047_CARD3_STAT: '1 Lakh+',
+	VISION_2047_CARD3_TITLE: 'United Educators Network',
+	VISION_2047_CARD3_DESC:
+		'Bringing together over one lakh dedicated private school teachers into a united national community for mutual support and growth.',
+
+	//- Vision 2047 Card 4
+	VISION_2047_CARD4_CATEGORY: 'Institutional Protection',
+	VISION_2047_CARD4_STAT: '36 States & UTs',
+	VISION_2047_CARD4_TITLE: 'Statewide Legal Cells',
+	VISION_2047_CARD4_DESC:
+		'Establishing active legal cells across every state and union territory to safeguard private schools and protect teacher rights.',
+
+	//- Vision 2047 Banner
+	VISION_2047_BANNER_TITLE: 'Building the Educational Foundation for a Developed India',
+	VISION_2047_BANNER_DESC:
+		'In alignment with the national vision of Vikasit Bharat 2047, AKSFPSA bridges ground-level classroom excellence with institutional support — ensuring every school is protected, every teacher is valued, and every student thrives.',
+	VISION_2047_BANNER_PRIMARY_BTN: 'Apply for Membership',
+	VISION_2047_BANNER_SECONDARY_BTN: 'Contact Association',
+	VISION_2047_BANNER_PRIMARY_URL: '/membership',
+	VISION_2047_BANNER_SECONDARY_URL: '/contact',
+
 	//- Footer text
 	FOOTER_INITIATIVES_TITLE: 'National Initiatives',
 	FOOTER_GLOBAL_TEACHERS_BANK: 'Global Teachers Bank',
 	FOOTER_AITF: 'All India Teachers Federation (AITF)',
 	FOOTER_LEGAL_SERVICES: 'United Law Advocates (Legal Counsel)',
-	FOOTER_MONTVILLE: 'Montville Preschool Project'
+	FOOTER_MONTVILLE: 'Montville Preschool Project',
+	FOOTER_VISION_2047: 'Vision 2047: Vikasit Bharat'
 };
 
 //- Layout and display constants
@@ -108,6 +156,13 @@ export const LEGAL_CTA_CONSTANTS = {
 
 //- Montville CTA display constants
 export const MONTVILLE_CTA_CONSTANTS = {
+	ICON_SIZE_LG: 24,
+	ICON_SIZE_MD: 20,
+	ICON_SIZE_SM: 16
+};
+
+//- Vision 2047 display constants
+export const VISION_2047_CONSTANTS = {
 	ICON_SIZE_LG: 24,
 	ICON_SIZE_MD: 20,
 	ICON_SIZE_SM: 16

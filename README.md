@@ -9,6 +9,7 @@ The home page is assembled in `src/routes/+page.svelte` and renders the followin
 - Hero: `src/lib/components/sections/Hero.svelte`
 - Stats: `src/lib/components/sections/Stats.svelte`
 - Gallery (highlights carousel): `src/lib/components/sections/Gallery.svelte`
+- Vision 2047: `src/lib/components/sections/Vision2047.svelte`
 - Membership Benefits: `src/lib/components/sections/MembershipBenefit.svelte`
 - Membership Plans: `src/lib/components/sections/MembershipPlans.svelte`
 - Courses: `src/lib/components/sections/Courses.svelte`
