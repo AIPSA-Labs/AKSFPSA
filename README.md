@@ -12,7 +12,10 @@ The home page is assembled in `src/routes/+page.svelte` and renders the followin
 - Membership Benefits: `src/lib/components/sections/MembershipBenefit.svelte`
 - Membership Plans: `src/lib/components/sections/MembershipPlans.svelte`
 - Courses: `src/lib/components/sections/Courses.svelte`
+- Teacher Initiatives CTA: `src/lib/components/sections/TeacherInitiativesCTA.svelte`
+- Pre-School Project (Montville) CTA: `src/lib/components/sections/MontvillePreSchoolCTA.svelte`
 - Partnerships (logo marquee + modal): `src/lib/components/sections/Partnership.svelte`
+- Legal Service CTA: `src/lib/components/sections/LegalServiceCTA.svelte`
 - Leadership: `src/lib/components/sections/Leadership.svelte`
 - Circulars: `src/lib/components/sections/Circulars.svelte`
 - CTA: `src/lib/components/sections/CTA.svelte`
