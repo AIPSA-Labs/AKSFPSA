@@ -2,11 +2,11 @@
 	//- Centralized user strings and layout constants
 	import { STRINGS, VISION_2047_CONSTANTS } from '$lib/constants/strings';
 	//- Lucide icons for vision goals
-	import { School, Briefcase, Users, ShieldCheck, ArrowRight } from '@lucide/svelte';
+	import { School, Briefcase, Users, ArrowRight } from '@lucide/svelte';
 	//- Smooth scroll reveal wrapper
 	import Reveal from '../utils/shared/Reveal.svelte';
 
-	//- Four foundational goals of Vision 2047
+	//- Three foundational goals of Vision 2047
 	const visionGoals = [
 		{
 			category: STRINGS.VISION_2047_CARD1_CATEGORY,
@@ -28,13 +28,6 @@
 			title: STRINGS.VISION_2047_CARD3_TITLE,
 			desc: STRINGS.VISION_2047_CARD3_DESC,
 			icon: Users
-		},
-		{
-			category: STRINGS.VISION_2047_CARD4_CATEGORY,
-			stat: STRINGS.VISION_2047_CARD4_STAT,
-			title: STRINGS.VISION_2047_CARD4_TITLE,
-			desc: STRINGS.VISION_2047_CARD4_DESC,
-			icon: ShieldCheck
 		}
 	];
 </script>
@@ -70,8 +63,8 @@
 				</p>
 			</div>
 
-			<!-- 4 Vision Targets Grid -->
-			<div class="mt-14 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+			<!-- 3 Vision Targets Grid -->
+			<div class="mt-14 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
 				{#each visionGoals as goal}
 					{@const Icon = goal.icon}
 					<div

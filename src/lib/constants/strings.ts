@@ -115,13 +115,6 @@ export const STRINGS = {
 	VISION_2047_CARD3_DESC:
 		'Bringing together over one lakh dedicated private school teachers into a united national community for mutual support and growth.',
 
-	//- Vision 2047 Card 4
-	VISION_2047_CARD4_CATEGORY: 'Institutional Protection',
-	VISION_2047_CARD4_STAT: '36 States & UTs',
-	VISION_2047_CARD4_TITLE: 'Statewide Legal Cells',
-	VISION_2047_CARD4_DESC:
-		'Establishing active legal cells across every state and union territory to safeguard private schools and protect teacher rights.',
-
 	//- Vision 2047 Banner
 	VISION_2047_BANNER_TITLE: 'Building the Educational Foundation for a Developed India',
 	VISION_2047_BANNER_DESC:
