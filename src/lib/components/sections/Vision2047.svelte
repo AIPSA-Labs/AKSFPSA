@@ -38,13 +38,11 @@
 			<!-- Header with Vikasit Bharat 2047 Logo -->
 			<div class="mx-auto max-w-3xl text-center">
 				<div class="mb-6 flex justify-center">
-					<div
-						class="flex h-32 w-32 items-center justify-center rounded-full border border-border bg-white p-3 shadow-xs sm:h-40 sm:w-40 md:h-44 md:w-44"
-					>
+					<div class="flex items-center justify-center rounded-2xl border border-border bg-white p-3 shadow-xs">
 						<img
 							src={STRINGS.VISION_2047_LOGO_URL}
 							alt={STRINGS.VISION_2047_LOGO_ALT}
-							class="h-full w-full rounded-full object-contain"
+							class="h-28 w-auto max-w-full object-contain sm:h-36 md:h-44"
 							loading="lazy"
 						/>
 					</div>

@@ -91,7 +91,7 @@ export const STRINGS = {
 		'A nationwide mission celebrating 100 years of Indian independence by building world-class school education, creating teacher opportunities, and supporting private institutions across Kerala and India.',
 	VISION_2047_LOGO_ALT: 'Vikasit Bharat Mission 2047 - Celebrating 100 Years of Independence',
 	VISION_2047_LOGO_URL:
-		'https://storage.allindiateachersfederation.com/uploads/2026/11/vikasit-bharat-mission-2047-logo.jpg',
+		'https://storage.allindiateachersfederation.com/uploads/2026/11/vikasit-bharat-vision-2047-logo.jpg',
 	VISION_2047_CARD_BADGE: 'National Education Mission',
 
 	//- Vision 2047 Card 1
