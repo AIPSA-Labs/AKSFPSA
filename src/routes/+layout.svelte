@@ -91,7 +91,7 @@
 	<title>{$meta.title}</title>
 	<meta name="description" content={$meta.description} />
 	<script type="application/ld+json">
-	{JSON.stringify(organizationSchema)}
+		{@html JSON.stringify(organizationSchema)}
 	</script>
 
 	<meta property="og:title" content={$meta.title} />
@@ -111,7 +111,7 @@
 	<meta name="theme-color" content="#800020" />
 	{#if $page.url.pathname !== '/'}
 		<script type="application/ld+json">
-		{JSON.stringify($breadcrumbSchema)}
+			{@html JSON.stringify($breadcrumbSchema)}
 		</script>
 	{/if}
 </svelte:head>

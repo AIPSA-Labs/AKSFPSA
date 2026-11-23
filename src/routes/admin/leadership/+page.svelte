@@ -258,8 +258,9 @@
 {/if}
 
 {#if selected}
-	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onclick={() => selected = null}>
-		<div class="mx-4 w-full max-w-md rounded-xl border border-border bg-surface shadow-lg" onclick={(e) => e.stopPropagation()}>
+	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onclick={() => selected = null} role="presentation">
+		<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_noninteractive_element_interactions -->
+		<div class="mx-4 w-full max-w-md rounded-xl border border-border bg-surface shadow-lg" onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" tabindex="-1">
 			<div class="flex items-center justify-between border-b border-border px-5 py-4">
 				<h2 class="text-base font-semibold text-text">Member Details</h2>
 				<button onclick={() => selected = null} class="text-text-muted hover:text-text"><X size={18} /></button>

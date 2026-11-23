@@ -58,8 +58,11 @@
 		}
 	}
 
-	function isActive(name: string, attrs?: Record<string, string>) {
-		return editor?.isActive(name, attrs) ?? false;
+	function isActive(name: string | Record<string, string>, attrs?: Record<string, string>) {
+		if (typeof name === 'string') {
+			return editor?.isActive(name, attrs) ?? false;
+		}
+		return editor?.isActive(name) ?? false;
 	}
 </script>
 

@@ -6,6 +6,7 @@
 		placeholder = 'Select date'
 	}: { value?: string; placeholder?: string } = $props();
 
+	let container = $state<HTMLDivElement | null>(null);
 	let show = $state(false);
 	let calMonth = $state(new Date().getMonth());
 	let calYear = $state(new Date().getFullYear());
@@ -14,14 +15,25 @@
 	const daysInMonth = $derived(new Date(calYear, calMonth + 1, 0).getDate());
 	const firstDayOfMonth = $derived(new Date(calYear, calMonth, 1).getDay());
 
+	const POPUP_HEIGHT_THRESHOLD = 350;
+	const MONTH_DECEMBER = 11;
+
 	function prevMonth() {
-		if (calMonth === 0) { calMonth = 11; calYear--; }
-		else calMonth--;
+		if (calMonth === 0) {
+			calMonth = MONTH_DECEMBER;
+			calYear -= 1;
+		} else {
+			calMonth -= 1;
+		}
 	}
 
 	function nextMonth() {
-		if (calMonth === 11) { calMonth = 0; calYear++; }
-		else calMonth++;
+		if (calMonth === MONTH_DECEMBER) {
+			calMonth = 0;
+			calYear += 1;
+		} else {
+			calMonth += 1;
+		}
 	}
 
 	function selectDate(day: number) {
@@ -33,26 +45,44 @@
 		const input = e.currentTarget as HTMLElement;
 		const rect = input.getBoundingClientRect();
 		const bottomSpace = window.innerHeight - rect.bottom;
-		openUp = bottomSpace < 350;
+		openUp = bottomSpace < POPUP_HEIGHT_THRESHOLD;
 		show = !show;
 	}
 
 	onMount(() => {
-		function onDocClick() { show = false; }
+		function onDocClick(e: MouseEvent) {
+			if (container && !container.contains(e.target as Node)) {
+				show = false;
+			}
+		}
 		document.addEventListener('click', onDocClick);
-		return () => document.removeEventListener('click', onDocClick);
+		return () => {
+			document.removeEventListener('click', onDocClick);
+		};
 	});
 </script>
 
-<div class="relative" onclick={(e) => e.stopPropagation()}>
-	<input type="text" readonly bind:value={value} {placeholder}
+<div class="relative" bind:this={container}>
+	<input
+		type="text"
+		readonly
+		bind:value={value}
+		{placeholder}
 		class="w-full cursor-pointer rounded-lg border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary"
-		onclick={toggleShow} onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { toggleShow(e); } }} />
+		onclick={toggleShow}
+		onkeydown={(e) => {
+			if (e.key === 'Enter' || e.key === ' ') {
+				toggleShow(e);
+			}
+		}}
+	/>
 	{#if show}
 		<div
 			class="absolute left-0 z-50 w-72 rounded-xl border border-border bg-surface p-3 shadow-lg"
-			class:top-full={!openUp} class:mt-1={!openUp}
-			class:bottom-full={openUp} class:mb-1={openUp}
+			class:top-full={!openUp}
+			class:mt-1={!openUp}
+			class:bottom-full={openUp}
+			class:mb-1={openUp}
 		>
 			<div class="mb-2 flex items-center justify-between">
 				<button onclick={prevMonth} class="rounded-lg p-1 text-text-muted hover:bg-background" type="button">&lt;</button>
@@ -68,9 +98,13 @@
 				{/each}
 				{#each Array(daysInMonth) as _, i}
 					{@const day = i + 1}
-					<button onclick={() => selectDate(day)}
+					<button
+						onclick={() => selectDate(day)}
 						class="rounded-lg py-1 text-text transition hover:bg-primary hover:text-white {value === `${months[calMonth]} ${day}, ${calYear}` ? 'bg-primary text-white' : ''}"
-						type="button">{day}</button>
+						type="button"
+					>
+						{day}
+					</button>
 				{/each}
 			</div>
 		</div>

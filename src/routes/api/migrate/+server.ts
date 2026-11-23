@@ -12,14 +12,16 @@ export async function GET({ url }) {
 			let errors = 0;
 
 			for (const obj of objects) {
-				if (!obj.Key) continue;
+				if (!obj.Key) {
+					continue;
+				}
 				const newKey = obj.Key.slice(OLD_PREFIX.length);
 				try {
 					await copyFile(obj.Key, newKey);
 					await deleteFile(obj.Key);
-					moved++;
+					moved += 1;
 				} catch (e) {
-					errors++;
+					errors += 1;
 					console.error(`Failed to move ${obj.Key}:`, e);
 				}
 			}

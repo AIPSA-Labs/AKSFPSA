@@ -113,7 +113,7 @@
 			</div>
 			<div class="flex justify-end gap-3 border-t border-border px-5 py-4">
 				<button onclick={() => { const s = selected!; const id = s.id; selected = null; openEdit(id); }} class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-primary-hover">Update</button>
-				<button onclick={() => { const s = selected!; removeFAQ(s.id); }} disabled={deletingFaq === s.id} class="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-100 disabled:opacity-50">{#if deletingFaq === s.id}<LoaderCircle size={14} class="inline animate-spin" /> Deleting...{:else}Delete{/if}</button>
+				<button onclick={() => { const s = selected!; removeFAQ(s.id); }} disabled={deletingFaq === selected.id} class="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-100 disabled:opacity-50">{#if deletingFaq === selected.id}<LoaderCircle size={14} class="inline animate-spin" /> Deleting...{:else}Delete{/if}</button>
 			</div>
 		</div>
 	</div>

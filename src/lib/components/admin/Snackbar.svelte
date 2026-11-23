@@ -17,7 +17,7 @@
 	};
 
 	function dismiss(id: number) {
-		snackbar.update((msgs) => msgs.filter((m) => m.id !== id));
+		snackbar.dismiss(id);
 	}
 </script>
 

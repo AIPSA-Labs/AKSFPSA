@@ -5,7 +5,7 @@
 
 <svelte:head>
 	<script type="application/ld+json">
-		{JSON.stringify(schema)}
+		{@html JSON.stringify(schema)}
 	</script>
 </svelte:head>
 

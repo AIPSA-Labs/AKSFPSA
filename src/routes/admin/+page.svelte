@@ -29,7 +29,7 @@
 		recentActions.load();
 	});
 
-	const stats: StatCard[] = [
+	const stats = $derived<StatCard[]>([
 		{ label: 'Circulars', value: counts['circulars'] ?? 0, icon: FileText, href: '/admin/circulars', color: 'border-l-primary' },
 		{ label: 'Courses', value: counts['courses'] ?? 0, icon: BookOpen, href: '/admin/courses', color: 'border-l-blue-500' },
 		{ label: 'Blog & Events', value: counts['blog'] ?? 0, icon: Feather, href: '/admin/blog', color: 'border-l-emerald-500' },
@@ -38,7 +38,7 @@
 		{ label: 'Leadership', value: counts['leaders'] ?? 0, icon: Users, href: '/admin/leadership', color: 'border-l-violet-500' },
 		{ label: 'FAQs', value: counts['faqs'] ?? 0, icon: HelpCircle, href: '/admin/faq', color: 'border-l-orange-500' },
 		{ label: 'Files', value: counts['files'] ?? 0, icon: FolderOpen, href: '/admin/files', color: 'border-l-teal-500' }
-	];
+	]);
 
 	let totalViews = $state(getTotalViews());
 	let todayViews = $state(getTodayViews());

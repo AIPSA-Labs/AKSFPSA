@@ -20,14 +20,19 @@ function createSnackbar() {
 	let nextId = 1;
 
 	function send(text: string, type: SnackbarType = 'info', duration = 4000) {
-		const id = nextId++;
+		const id = nextId;
+		nextId += 1;
 		update((msgs) => [...msgs, { id, text, type }]);
 		setTimeout(() => {
 			update((msgs) => msgs.filter((m) => m.id !== id));
 		}, duration);
 	}
 
-	return { subscribe, send };
+	function dismiss(id: number) {
+		update((msgs) => msgs.filter((m) => m.id !== id));
+	}
+
+	return { subscribe, send, dismiss, update };
 }
 
 function createRecentActions() {
@@ -38,7 +43,8 @@ function createRecentActions() {
 		const now = new Date();
 		const time = now.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) + ' ' +
 			now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-		const optimistic: RecentAction = { id: nextId++, text, time, entity };
+		const optimistic: RecentAction = { id: nextId, text, time, entity };
+		nextId += 1;
 		update((actions) => [optimistic, ...actions].slice(0, 50));
 		fetch('/api/admin/actions', {
 			method: 'POST',

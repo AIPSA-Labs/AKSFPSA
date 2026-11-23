@@ -16,7 +16,7 @@
 
 	let editForm = $state({ id: 0, slug: '', title: '', date: '', category: '', cover: '', description: '', images: [] });
 
-	let pendingImages: (GalleryImage & { uploading?: boolean })[] = $state([]);
+	let pendingImages: (GalleryImage & { uploading?: boolean; error?: string })[] = $state([]);
 
 	let deletingImageId = $state<number | null>(null);
 	let savingEdit = $state(false);

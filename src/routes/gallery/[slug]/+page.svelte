@@ -102,6 +102,9 @@
 <!-- Lightbox -->
 {#if lightboxOpen && album}
 	<div class="fixed inset-0 z-50 flex flex-col bg-black/95"
+		role="dialog"
+		aria-modal="true"
+		tabindex="-1"
 		onkeydown={handleKey}
 		ontouchstart={handleTouchStart}
 		ontouchend={handleTouchEnd}>
