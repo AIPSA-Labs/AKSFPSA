@@ -141,6 +141,6 @@ export async function migrate() {
 	}
 
 	await sql`INSERT INTO contact_info (id, address, email, phones, hours)
-		VALUES (1, 'All Kerala Self Financing Private Schools Association\n123 Institutional Road\nErnakulam, Kerala – 682001', 'info@association.org', ARRAY['+91 98765 43210'], 'Monday – Friday\n10:00 AM – 5:00 PM')
+		VALUES (1, 'All Kerala Self Financing Private Schools Association\nPanampilly Nagar\nErnakulam, Kochi, Kerala – 682036', 'info@allkeralaprivateschools.org', ARRAY['+91 94460 06641'], 'Monday – Friday\n10:00 AM – 5:00 PM')
 		ON CONFLICT (id) DO NOTHING`;
 }

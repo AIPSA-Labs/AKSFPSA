@@ -1,3 +1,4 @@
+//- Entity Collection CRUD Endpoints
 import { json } from '@sveltejs/kit';
 import { sql } from '$lib/server/db';
 
@@ -15,26 +16,32 @@ const tables: Record<string, { table: string; id: string }> = {
 	files: { table: 'uploaded_files', id: 'id' },
 	'gallery-categories': { table: 'gallery_categories', id: 'id' },
 	'contact-info': { table: 'contact_info', id: 'id' },
-	'contact-submissions': { table: 'contact_submissions', id: 'id' },
+	'contact-submissions': { table: 'contact_submissions', id: 'id' }
 };
 
 export async function GET({ params, url }) {
 	const meta = tables[params.entity];
-	if (!meta) return json({ error: 'Unknown entity' }, { status: 400 });
+	if (!meta) {
+		return json({ error: 'Unknown entity' }, { status: 400 });
+	}
 
 	const id = url.searchParams.get('id');
 
 	if (params.entity === 'gallery') {
 		if (id) {
 			const [album] = await sql`SELECT * FROM gallery_albums WHERE id = ${Number(id)}`;
-			if (!album) return json({ error: 'Not found' }, { status: 404 });
+			if (!album) {
+				return json({ error: 'Not found' }, { status: 404 });
+			}
 			album.images = await sql`SELECT * FROM gallery_images WHERE album_id = ${album.id} ORDER BY id`;
 			return json(album);
 		}
 		const albums = await sql`SELECT * FROM gallery_albums ORDER BY id DESC`;
 		const allImages = await sql`SELECT * FROM gallery_images ORDER BY id`;
 		for (const a of albums as Array<Record<string, unknown>>) {
-			(a as Record<string, unknown>).images = (allImages as Array<Record<string, unknown>>).filter((i) => (i as Record<string, unknown>).album_id === (a as Record<string, unknown>).id);
+			(a as Record<string, unknown>).images = (allImages as Array<Record<string, unknown>>).filter(
+				(i) => (i as Record<string, unknown>).album_id === (a as Record<string, unknown>).id
+			);
 		}
 		return json(albums);
 	}
@@ -47,7 +54,9 @@ export async function GET({ params, url }) {
 	if (id) {
 		const col = meta.id === 'id' ? sql`id = ${Number(id)}` : sql`slug = ${id}`;
 		const [item] = await sql`SELECT * FROM ${sql(meta.table)} WHERE ${col}`;
-		if (!item) return json({ error: 'Not found' }, { status: 404 });
+		if (!item) {
+			return json({ error: 'Not found' }, { status: 404 });
+		}
 		return json(item);
 	}
 
@@ -57,7 +66,9 @@ export async function GET({ params, url }) {
 
 export async function POST({ params, request }) {
 	const meta = tables[params.entity];
-	if (!meta) return json({ error: 'Unknown entity' }, { status: 400 });
+	if (!meta) {
+		return json({ error: 'Unknown entity' }, { status: 400 });
+	}
 
 	const body = await request.json();
 
@@ -70,7 +81,9 @@ export async function POST({ params, request }) {
 	const allowedCols = getColumns(params.entity);
 	const data: Record<string, unknown> = {};
 	for (const key of Object.keys(body)) {
-		if (allowedCols.includes(key)) data[key] = body[key];
+		if (allowedCols.includes(key)) {
+			data[key] = body[key];
+		}
 	}
 
 	if (params.entity === 'events' && !data.slug) {
@@ -104,7 +117,7 @@ function getColumns(entity: string): string[] {
 		files: ['name', 'type', 'size', 'data', 'date'],
 		'gallery-categories': ['name'],
 		'contact-info': ['address', 'email', 'phones', 'hours'],
-		'contact-submissions': ['name', 'institution', 'email', 'phone', 'message', 'date', 'status', 'notes', 'source'],
+		'contact-submissions': ['name', 'institution', 'email', 'phone', 'message', 'date', 'status', 'notes', 'source']
 	};
 	return colMap[entity] || [];
 }

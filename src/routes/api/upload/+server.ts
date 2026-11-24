@@ -1,3 +1,4 @@
+//- R2 File Upload and Deletion Endpoints
 import { json } from '@sveltejs/kit';
 import { uploadFile, deleteFile } from '$lib/server/r2';
 
