@@ -1,5 +1,7 @@
+//- Dynamic XML Sitemap Generator with Live Database Synchronization
 import type { RequestHandler } from './$types';
 import { SITE_CONFIG } from '$lib/constants/strings';
+import { sql } from '$lib/server/db';
 
 interface RouteEntry {
 	loc: string;
@@ -22,22 +24,26 @@ const staticRoutes: RouteEntry[] = [
 	{ loc: '/blog', changefreq: 'daily', priority: '0.8' }
 ];
 
-const courseSlugs = [
+const fallbackCourseSlugs = [
 	'school-governance',
 	'teacher-certification',
 	'financial-planning',
 	'digital-infrastructure'
 ];
 
-const eventSlugs = [
+const fallbackEventSlugs = [
 	'annual-leadership-meet-2026',
 	'district-coordinators-meet',
 	'teacher-certification-workshop'
 ];
 
-const gallerySlugs = ['conference-2026', 'district-meet-malappuram', 'teacher-certification-2025'];
+const fallbackGallerySlugs = [
+	'conference-2026',
+	'district-meet-malappuram',
+	'teacher-certification-2025'
+];
 
-const blogSlugs = [
+const fallbackBlogSlugs = [
 	'teacher-certification-program-open',
 	'annual-leadership-meet-2026',
 	'district-coordinators-meet'
@@ -45,10 +51,16 @@ const blogSlugs = [
 
 const today = new Date().toISOString().split('T')[0];
 
-function generateUrlXml(loc: string, changefreq: string, priority: string): string {
+function generateUrlXml(
+	loc: string,
+	changefreq: string,
+	priority: string,
+	lastmodDate?: string
+): string {
+	const mod = lastmodDate || today;
 	return `  <url>
     <loc>${SITE_CONFIG.BASE_URL}${loc}</loc>
-    <lastmod>${today}</lastmod>
+    <lastmod>${mod}</lastmod>
     <changefreq>${changefreq}</changefreq>
     <priority>${priority}</priority>
   </url>`;
@@ -56,7 +68,42 @@ function generateUrlXml(loc: string, changefreq: string, priority: string): stri
 
 export const GET: RequestHandler = async () => {
 	const staticUrls = staticRoutes.map((r) => generateUrlXml(r.loc, r.changefreq, r.priority));
-	const courseUrls = courseSlugs.map((slug) => generateUrlXml(`/courses/${slug}`, 'weekly', '0.7'));
+
+	//- Dynamically load live blog posts and events from the database
+	let blogSlugs = fallbackBlogSlugs;
+	let eventSlugs = fallbackEventSlugs;
+	let gallerySlugs = fallbackGallerySlugs;
+
+	try {
+		const livePosts = await sql<{ slug: string; type: string }>`
+			SELECT slug, type FROM blog_posts WHERE status = 'published'
+		`;
+		if (livePosts && livePosts.length > 0) {
+			const blogs = livePosts.filter((p) => p.type === 'post').map((p) => p.slug);
+			const events = livePosts.filter((p) => p.type === 'event').map((p) => p.slug);
+			if (blogs.length > 0) {
+				blogSlugs = Array.from(new Set([...blogs, ...fallbackBlogSlugs]));
+			}
+			if (events.length > 0) {
+				eventSlugs = Array.from(new Set([...events, ...fallbackEventSlugs]));
+			}
+		}
+
+		const liveGalleries = await sql<{ slug: string }>`
+			SELECT slug FROM gallery_albums WHERE slug IS NOT NULL AND slug != ''
+		`;
+		if (liveGalleries && liveGalleries.length > 0) {
+			gallerySlugs = Array.from(
+				new Set([...liveGalleries.map((g) => g.slug), ...fallbackGallerySlugs])
+			);
+		}
+	} catch {
+		//- Keep fallback slugs if database is temporarily unavailable
+	}
+
+	const courseUrls = fallbackCourseSlugs.map((slug) =>
+		generateUrlXml(`/courses/${slug}`, 'weekly', '0.7')
+	);
 	const eventUrls = eventSlugs.map((slug) => generateUrlXml(`/events/${slug}`, 'weekly', '0.7'));
 	const galleryUrls = gallerySlugs.map((slug) =>
 		generateUrlXml(`/gallery/${slug}`, 'weekly', '0.6')

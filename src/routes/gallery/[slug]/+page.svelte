@@ -6,7 +6,9 @@
 	import { ArrowLeft, ChevronLeft, ChevronRight, X } from '@lucide/svelte';
 	import { SITE_CONFIG } from '$lib/constants/strings';
 
-	let album = $state<GalleryAlbum | null>(null);
+	let { data } = $props();
+	let clientAlbum = $state<GalleryAlbum | null>(null);
+	let album = $derived<GalleryAlbum | null>(data?.album ?? clientAlbum);
 	let lightboxOpen = $state(false);
 	let currentIndex = $state(0);
 	let touchStartX = $state(0);
@@ -35,8 +37,10 @@
 	);
 
 	onMount(async () => {
-		const albums = await list<GalleryAlbum>('gallery');
-		album = albums.find((a) => a.slug === $page.params.slug) ?? null;
+		if (!album) {
+			const albums = await list<GalleryAlbum>('gallery');
+			clientAlbum = albums.find((a) => a.slug === $page.params.slug) ?? null;
+		}
 	});
 
 	function openLightbox(index: number) {

@@ -36,7 +36,34 @@
 			form = { name: '', institution: '', email: '', phone: '', message: '' };
 		}
 	}
+
+	const contactSchema = {
+		'@context': 'https://schema.org',
+		'@type': 'ContactPage',
+		name: 'Contact AKSFPSA',
+		description: 'Official contact and inquiry details for All Kerala Self-Financing Private Schools Association',
+		url: `${SITE_CONFIG.BASE_URL}/contact`,
+		mainEntity: {
+			'@type': 'EducationalOrganization',
+			name: SITE_CONFIG.SITE_NAME,
+			telephone: SITE_CONFIG.CONTACT_PHONE,
+			email: SITE_CONFIG.CONTACT_EMAIL,
+			address: {
+				'@type': 'PostalAddress',
+				streetAddress: SITE_CONFIG.OFFICE_ADDRESS.STREET,
+				addressLocality: SITE_CONFIG.OFFICE_ADDRESS.LOCALITY,
+				addressRegion: SITE_CONFIG.OFFICE_ADDRESS.REGION,
+				postalCode: SITE_CONFIG.OFFICE_ADDRESS.POSTAL_CODE,
+				addressCountry: SITE_CONFIG.OFFICE_ADDRESS.COUNTRY
+			}
+		}
+	};
+	const contactScript = `<script type="application/ld+json">${JSON.stringify(contactSchema)}</` + `script>`;
 </script>
+
+<svelte:head>
+	{@html contactScript}
+</svelte:head>
 
 <section class="min-h-screen bg-background">
 	<div class="mx-auto max-w-6xl px-6 py-20 lg:px-8">

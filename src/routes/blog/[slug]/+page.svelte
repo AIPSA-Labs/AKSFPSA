@@ -5,7 +5,9 @@
 	import type { BlogPost } from '$lib/stores/data';
 	import { SITE_CONFIG } from '$lib/constants/strings';
 
-	let post = $state<BlogPost | null>(null);
+	let { data } = $props();
+	let clientPost = $state<BlogPost | null>(null);
+	let post = $derived<BlogPost | null>(data?.post ?? clientPost);
 
 	const blogPostingSchema = $derived(
 		post
@@ -45,8 +47,10 @@
 	);
 
 	onMount(async () => {
-		const posts = await list<BlogPost>('blog');
-		post = posts.find((p) => p.status === 'published' && p.slug === $page.params.slug) ?? null;
+		if (!post) {
+			const posts = await list<BlogPost>('blog');
+			clientPost = posts.find((p) => p.status === 'published' && p.slug === $page.params.slug) ?? null;
+		}
 	});
 </script>
 

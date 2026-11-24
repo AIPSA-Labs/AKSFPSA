@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { SITE_CONFIG } from '$lib/constants/strings';
+
 	const objectives: string[] = [
 		"To provide unified representation for private self-financing institutions.",
 		"To facilitate collaboration and knowledge sharing across districts.",
@@ -6,7 +8,25 @@
 		"To promote faculty development and certification initiatives.",
 		"To strengthen financial and operational sustainability of member schools."
 	];
+
+	const aboutSchema = {
+		'@context': 'https://schema.org',
+		'@type': 'AboutPage',
+		name: 'About AKSFPSA',
+		description: 'Mission, vision, and core objectives of the All Kerala Self-Financing Private Schools Association',
+		url: `${SITE_CONFIG.BASE_URL}/about`,
+		mainEntity: {
+			'@type': 'EducationalOrganization',
+			name: SITE_CONFIG.SITE_NAME,
+			url: SITE_CONFIG.BASE_URL
+		}
+	};
+	const aboutScript = `<script type="application/ld+json">${JSON.stringify(aboutSchema)}</` + `script>`;
 </script>
+
+<svelte:head>
+	{@html aboutScript}
+</svelte:head>
 
 <section class="bg-background min-h-screen">
 	<div class="max-w-6xl mx-auto px-6 lg:px-8 py-20">

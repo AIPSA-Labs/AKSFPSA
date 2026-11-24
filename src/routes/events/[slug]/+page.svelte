@@ -5,7 +5,9 @@
 	import type { BlogPost } from '$lib/stores/data';
 	import { SITE_CONFIG } from '$lib/constants/strings';
 
-	let event = $state<BlogPost | null>(null);
+	let { data } = $props();
+	let clientEvent = $state<BlogPost | null>(null);
+	let event = $derived<BlogPost | null>(data?.event ?? clientEvent);
 
 	const eventSchema = $derived(
 		event
@@ -45,11 +47,13 @@
 	);
 
 	onMount(async () => {
-		const posts = await list<BlogPost>('blog');
-		event =
-			posts.find(
-				(p) => p.status === 'published' && p.type === 'event' && p.slug === $page.params.slug
-			) ?? null;
+		if (!event) {
+			const posts = await list<BlogPost>('blog');
+			clientEvent =
+				posts.find(
+					(p) => p.status === 'published' && p.type === 'event' && p.slug === $page.params.slug
+				) ?? null;
+		}
 	});
 </script>
 

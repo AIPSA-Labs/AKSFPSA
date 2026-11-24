@@ -65,6 +65,20 @@ const faqs: FAQ[] = [
 	}
 ];
 
+const faqSchema = {
+	'@context': 'https://schema.org',
+	'@type': 'FAQPage',
+	mainEntity: faqs.map((f) => ({
+		'@type': 'Question',
+		name: f.question,
+		acceptedAnswer: {
+			'@type': 'Answer',
+			text: f.answer
+		}
+	}))
+};
+const faqScript = `<script type="application/ld+json">${JSON.stringify(faqSchema)}</` + `script>`;
+
 let openIndex: number | null = null;
 
 function toggle(index: number) {
@@ -72,6 +86,10 @@ function toggle(index: number) {
 }
 
 </script>
+
+<svelte:head>
+	{@html faqScript}
+</svelte:head>
 
 <section class="bg-background">
 	<div class="max-w-7xl mx-auto px-6 lg:px-8 py-20">
