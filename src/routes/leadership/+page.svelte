@@ -10,41 +10,43 @@
 	onMount(async () => {
 		try {
 			const items = await list<Leader>('leaders');
-			officeBearers = items.filter(l => l.group === 'office-bearers');
-			committeeMembers = items.filter(l => l.group === 'executive-members');
-		} catch { /* keep empty */ } finally { loading = false; }
+			officeBearers = items.filter((l) => l.group === 'office-bearers');
+			committeeMembers = items.filter((l) => l.group === 'executive-members');
+		} catch {
+			/* keep empty */
+		} finally {
+			loading = false;
+		}
 	});
 </script>
 
-<section class="bg-background min-h-screen">
-	<div class="max-w-7xl mx-auto px-6 lg:px-8 py-20">
+<section class="min-h-screen bg-background">
+	<div class="mx-auto max-w-7xl px-6 py-20 lg:px-8">
+		<h1 class="text-4xl font-semibold text-primary">Executive Committee</h1>
 
-		<h1 class="text-4xl font-semibold text-primary">
-			Executive Committee
-		</h1>
-
-		<p class="mt-6 text-text-muted max-w-3xl leading-relaxed">
-			The association is governed by a structured executive committee representing
-			institutions across districts in Kerala. The leadership ensures coordinated
-			policy alignment and statewide representation.
+		<p class="mt-6 max-w-3xl leading-relaxed text-text-muted">
+			The association is governed by a structured executive committee representing institutions
+			across districts in Kerala. The leadership ensures coordinated policy alignment and statewide
+			representation.
 		</p>
 
 		<div class="mt-20">
+			<h2 class="text-2xl font-semibold text-primary">Office Bearers</h2>
 
-			<h2 class="text-2xl font-semibold text-primary">
-				Office Bearers
-			</h2>
-
-			<div class="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-12">
-
+			<div class="mt-10 grid gap-12 sm:grid-cols-2 lg:grid-cols-3">
 				{#each officeBearers as member}
 					<div class="text-center">
-
-						<div class="w-40 h-40 mx-auto rounded-full overflow-hidden border border-border bg-surface">
+						<div
+							class="mx-auto h-40 w-40 overflow-hidden rounded-full border border-border bg-surface"
+						>
 							<img
 								src={member.image}
 								alt={member.name}
-								class="w-full h-full object-cover"
+								width="160"
+								height="160"
+								loading="lazy"
+								decoding="async"
+								class="h-full w-full object-cover"
 							/>
 						</div>
 
@@ -52,7 +54,7 @@
 							{member.name}
 						</h3>
 
-						<p class="mt-2 text-sm uppercase tracking-wide text-text-muted">
+						<p class="mt-2 text-sm tracking-wide text-text-muted uppercase">
 							{member.role}
 						</p>
 
@@ -61,30 +63,28 @@
 								{member.district}
 							</p>
 						{/if}
-
 					</div>
 				{/each}
-
 			</div>
-
 		</div>
 
 		<div class="mt-24">
+			<h2 class="text-2xl font-semibold text-primary">Executive Members</h2>
 
-			<h2 class="text-2xl font-semibold text-primary">
-				Executive Members
-			</h2>
-
-			<div class="mt-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-12">
-
+			<div class="mt-10 grid gap-12 sm:grid-cols-2 lg:grid-cols-4">
 				{#each committeeMembers as member}
 					<div class="text-center">
-
-						<div class="w-32 h-32 mx-auto rounded-full overflow-hidden border border-border bg-surface">
+						<div
+							class="mx-auto h-32 w-32 overflow-hidden rounded-full border border-border bg-surface"
+						>
 							<img
 								src={member.image}
 								alt={member.name}
-								class="w-full h-full object-cover"
+								width="128"
+								height="128"
+								loading="lazy"
+								decoding="async"
+								class="h-full w-full object-cover"
 							/>
 						</div>
 
@@ -92,7 +92,7 @@
 							{member.name}
 						</h3>
 
-						<p class="mt-2 text-xs uppercase tracking-wide text-text-muted">
+						<p class="mt-2 text-xs tracking-wide text-text-muted uppercase">
 							{member.role}
 						</p>
 
@@ -101,13 +101,9 @@
 								{member.district}
 							</p>
 						{/if}
-
 					</div>
 				{/each}
-
 			</div>
-
 		</div>
-
 	</div>
 </section>

@@ -168,8 +168,8 @@
 		<!-- Geo Tags for Local SEO in Kerala -->
 		<meta name="geo.region" content="IN-KL" />
 		<meta name="geo.placename" content="Kerala, India" />
-		<meta name="geo.position" content="9.9816;76.2999" />
-		<meta name="ICBM" content="9.9816, 76.2999" />
+		<meta name="geo.position" content="9.9937;76.3030" />
+		<meta name="ICBM" content="9.9937, 76.3030" />
 
 		<!-- OpenGraph Meta Tags -->
 		<meta property="og:site_name" content={SITE_CONFIG.SITE_NAME} />

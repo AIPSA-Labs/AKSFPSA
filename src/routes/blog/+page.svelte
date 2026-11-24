@@ -11,7 +11,20 @@
 		posts = all
 			.filter((p) => p.status === 'published' && p.type === 'post')
 			.sort((a, b) => {
-				const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+				const months = [
+					'January',
+					'February',
+					'March',
+					'April',
+					'May',
+					'June',
+					'July',
+					'August',
+					'September',
+					'October',
+					'November',
+					'December'
+				];
 				const da = a.date.split(' ');
 				const db = b.date.split(' ');
 				const na = months.indexOf(da[1]) * 100 + parseInt(da[0]);
@@ -29,15 +42,10 @@
 	);
 </script>
 
-<svelte:head>
-	<title>Blog — AKSFPSA</title>
-	<meta name="description" content="Latest news, announcements, and articles from the All Kerala Self Financing Private Schools Association." />
-</svelte:head>
-
-<section class="bg-background min-h-screen">
-	<div class="max-w-6xl mx-auto px-6 lg:px-8 py-20">
+<section class="min-h-screen bg-background">
+	<div class="mx-auto max-w-6xl px-6 py-20 lg:px-8">
 		<h1 class="text-4xl font-semibold text-primary">Blog & Updates</h1>
-		<p class="mt-4 text-text-muted max-w-3xl">
+		<p class="mt-4 max-w-3xl text-text-muted">
 			Latest news, announcements, and articles from the association.
 		</p>
 
@@ -46,29 +54,33 @@
 				type="text"
 				placeholder="Search posts..."
 				bind:value={search}
-				class="w-full max-w-md rounded-lg border border-border bg-surface px-4 py-2.5 text-sm outline-none transition focus:border-primary"
+				class="w-full max-w-md rounded-lg border border-border bg-surface px-4 py-2.5 text-sm transition outline-none focus:border-primary"
 			/>
 		</div>
 
 		<div class="mt-10 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
 			{#each filtered as post}
-				<article class="flex flex-col rounded-xl border border-border bg-surface overflow-hidden transition hover:shadow-md">
+				<article
+					class="flex flex-col overflow-hidden rounded-xl border border-border bg-surface transition hover:shadow-md"
+				>
 					{#if post.cover}
 						<div class="h-48 overflow-hidden">
 							<img src={post.cover} alt={post.title} class="h-full w-full object-cover" />
 						</div>
 					{/if}
 					<div class="flex flex-1 flex-col p-6">
-						<div class="flex flex-wrap gap-2 mb-3">
+						<div class="mb-3 flex flex-wrap gap-2">
 							{#each post.tags as tag}
-								<span class="rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">{tag}</span>
+								<span class="rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary"
+									>{tag}</span
+								>
 							{/each}
 						</div>
-						<h2 class="text-lg font-semibold text-primary leading-tight">
+						<h2 class="text-lg leading-tight font-semibold text-primary">
 							<a href="/blog/{post.slug}" class="hover:underline">{post.title}</a>
 						</h2>
-						<p class="mt-2 text-sm text-text-muted line-clamp-3">{post.excerpt}</p>
-						<div class="mt-auto pt-4 flex items-center justify-between text-xs text-text-muted">
+						<p class="mt-2 line-clamp-3 text-sm text-text-muted">{post.excerpt}</p>
+						<div class="mt-auto flex items-center justify-between pt-4 text-xs text-text-muted">
 							<span>{post.date}</span>
 							<span>{post.author}</span>
 						</div>
@@ -77,7 +89,9 @@
 			{/each}
 			{#if filtered.length === 0}
 				<div class="col-span-full py-16 text-center text-text-muted">
-					{posts.length === 0 ? 'No posts published yet. Check back soon!' : 'No posts match your search.'}
+					{posts.length === 0
+						? 'No posts published yet. Check back soon!'
+						: 'No posts match your search.'}
 				</div>
 			{/if}
 		</div>

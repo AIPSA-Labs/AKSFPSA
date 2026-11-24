@@ -82,6 +82,8 @@
 						<img
 							src={albums[current].image}
 							alt={albums[current].title}
+							loading="lazy"
+							decoding="async"
 							class="h-full w-full object-cover"
 						/>
 					</div>

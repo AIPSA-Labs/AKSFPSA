@@ -53,7 +53,15 @@
 					<div
 						class="mx-auto h-36 w-36 overflow-hidden rounded-full border border-border bg-surface"
 					>
-						<img src={leader.image} alt={leader.name} class="h-full w-full object-cover" />
+						<img
+							src={leader.image}
+							alt={leader.name}
+							width="144"
+							height="144"
+							loading="lazy"
+							decoding="async"
+							class="h-full w-full object-cover"
+						/>
 					</div>
 
 					<h3 class="mt-6 text-lg font-semibold text-primary">
