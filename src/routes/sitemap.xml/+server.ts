@@ -1,63 +1,79 @@
-import type { RequestHandler } from "./$types";
+import type { RequestHandler } from './$types';
+import { SITE_CONFIG } from '$lib/constants/strings';
 
-const baseUrl = "https://yourdomain.com";
+interface RouteEntry {
+	loc: string;
+	changefreq: 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly';
+	priority: string;
+}
 
-const staticRoutes = [
-	"",
-	"/about",
-	"/membership",
-	"/membership/apply",
-	"/courses",
-	"/events",
-	"/gallery",
-	"/leadership",
-	"/members",
-	"/contact",
-	"/circulars"
+const staticRoutes: RouteEntry[] = [
+	{ loc: '', changefreq: 'daily', priority: '1.0' },
+	{ loc: '/about', changefreq: 'monthly', priority: '0.9' },
+	{ loc: '/services', changefreq: 'weekly', priority: '0.9' },
+	{ loc: '/circulars', changefreq: 'daily', priority: '0.9' },
+	{ loc: '/courses', changefreq: 'weekly', priority: '0.8' },
+	{ loc: '/events', changefreq: 'weekly', priority: '0.8' },
+	{ loc: '/gallery', changefreq: 'weekly', priority: '0.7' },
+	{ loc: '/leadership', changefreq: 'monthly', priority: '0.7' },
+	{ loc: '/membership', changefreq: 'monthly', priority: '0.9' },
+	{ loc: '/membership/apply', changefreq: 'monthly', priority: '0.8' },
+	{ loc: '/contact', changefreq: 'monthly', priority: '0.8' },
+	{ loc: '/blog', changefreq: 'daily', priority: '0.8' }
 ];
 
-const courses = [
-	"school-governance",
-	"teacher-certification"
+const courseSlugs = [
+	'school-governance',
+	'teacher-certification',
+	'financial-planning',
+	'digital-infrastructure'
 ];
 
-const events = [
-	"annual-leadership-meet-2026",
-	"district-coordinators-meet",
-	"teacher-certification-workshop"
+const eventSlugs = [
+	'annual-leadership-meet-2026',
+	'district-coordinators-meet',
+	'teacher-certification-workshop'
 ];
 
-const galleries = [
-	"conference-2026",
-	"district-meet-malappuram"
+const gallerySlugs = ['conference-2026', 'district-meet-malappuram', 'teacher-certification-2025'];
+
+const blogSlugs = [
+	'teacher-certification-program-open',
+	'annual-leadership-meet-2026',
+	'district-coordinators-meet'
 ];
 
-function generateUrl(loc: string) {
-	return `
-		<url>
-			<loc>${baseUrl}${loc}</loc>
-			<changefreq>monthly</changefreq>
-			<priority>0.8</priority>
-		</url>
-	`;
+const today = new Date().toISOString().split('T')[0];
+
+function generateUrlXml(loc: string, changefreq: string, priority: string): string {
+	return `  <url>
+    <loc>${SITE_CONFIG.BASE_URL}${loc}</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>${changefreq}</changefreq>
+    <priority>${priority}</priority>
+  </url>`;
 }
 
 export const GET: RequestHandler = async () => {
-	const urls = [
-		...staticRoutes.map((route) => generateUrl(route)),
-		...courses.map((slug) => generateUrl(`/courses/${slug}`)),
-		...events.map((slug) => generateUrl(`/events/${slug}`)),
-		...galleries.map((slug) => generateUrl(`/gallery/${slug}`))
-	];
+	const staticUrls = staticRoutes.map((r) => generateUrlXml(r.loc, r.changefreq, r.priority));
+	const courseUrls = courseSlugs.map((slug) => generateUrlXml(`/courses/${slug}`, 'weekly', '0.7'));
+	const eventUrls = eventSlugs.map((slug) => generateUrlXml(`/events/${slug}`, 'weekly', '0.7'));
+	const galleryUrls = gallerySlugs.map((slug) =>
+		generateUrlXml(`/gallery/${slug}`, 'weekly', '0.6')
+	);
+	const blogUrls = blogSlugs.map((slug) => generateUrlXml(`/blog/${slug}`, 'weekly', '0.7'));
+
+	const allUrls = [...staticUrls, ...courseUrls, ...eventUrls, ...galleryUrls, ...blogUrls];
 
 	const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
-		<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-			${urls.join("")}
-		</urlset>`;
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${allUrls.join('\n')}
+</urlset>`;
 
 	return new Response(sitemap, {
 		headers: {
-			"Content-Type": "application/xml"
+			'Content-Type': 'application/xml',
+			'Cache-Control': 'public, max-age=3600, s-maxage=3600'
 		}
 	});
 };

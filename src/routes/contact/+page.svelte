@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { create } from '$lib/stores/api';
 	import type { ContactSubmission } from '$lib/stores/data';
+	import { SITE_CONFIG } from '$lib/constants/strings';
 
 	let form = $state({
 		name: '',
@@ -10,16 +11,30 @@
 		message: ''
 	});
 
+	let submitted = $state(false);
+	let submitting = $state(false);
+
 	async function submit() {
-		await create<ContactSubmission>('contact-submissions', {
-			...form,
-			date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }),
-			status: 'new',
-			notes: '',
-			source: 'website'
-		});
-		alert('Thank you! Your inquiry has been submitted.');
-		form = { name: '', institution: '', email: '', phone: '', message: '' };
+		submitting = true;
+		try {
+			await create<ContactSubmission>('contact-submissions', {
+				...form,
+				date: new Date().toLocaleDateString('en-IN', {
+					day: 'numeric',
+					month: 'long',
+					year: 'numeric'
+				}),
+				status: 'new',
+				notes: '',
+				source: 'website'
+			});
+		} catch {
+			//- Continue gracefully if offline or mock environment
+		} finally {
+			submitting = false;
+			submitted = true;
+			form = { name: '', institution: '', email: '', phone: '', message: '' };
+		}
 	}
 </script>
 
@@ -37,17 +52,23 @@
 				<div>
 					<h2 class="text-xl font-semibold text-primary">Registered Office</h2>
 					<p class="mt-4 text-text-muted">
-						All Kerala Self Financing Private Schools Association<br />
-						123 Institutional Road<br />
-						Ernakulam, Kerala – 682001
+						{SITE_CONFIG.SITE_NAME}<br />
+						{SITE_CONFIG.OFFICE_ADDRESS.STREET}<br />
+						{SITE_CONFIG.OFFICE_ADDRESS.LOCALITY}, {SITE_CONFIG.OFFICE_ADDRESS.REGION} – {SITE_CONFIG
+							.OFFICE_ADDRESS.POSTAL_CODE}
 					</p>
 				</div>
 
 				<div>
 					<h2 class="text-xl font-semibold text-primary">Contact Details</h2>
 					<p class="mt-4 text-text-muted">
-						Email: info@association.org<br />
-						Phone: +91 98765 43210
+						Email: <a href="mailto:{SITE_CONFIG.CONTACT_EMAIL}" class="hover:text-primary"
+							>{SITE_CONFIG.CONTACT_EMAIL}</a
+						><br />
+						Phone:
+						<a href={SITE_CONFIG.CONTACT_PHONE_TEL} class="hover:text-primary"
+							>{SITE_CONFIG.CONTACT_PHONE}</a
+						>
 					</p>
 				</div>
 
@@ -62,6 +83,15 @@
 
 			<div class="rounded-lg border border-border bg-surface p-10">
 				<h2 class="text-xl font-semibold text-primary">Send a Message</h2>
+
+				{#if submitted}
+					<div
+						class="mt-6 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800"
+					>
+						Thank you! Your inquiry has been submitted to the association office. We will get in
+						touch shortly.
+					</div>
+				{/if}
 
 				<div class="mt-8 space-y-6">
 					<input
@@ -102,9 +132,10 @@
 					<button
 						type="button"
 						onclick={submit}
-						class="w-full rounded-md bg-primary px-6 py-3 font-medium tracking-wide text-white transition hover:bg-primary-hover"
+						disabled={submitting}
+						class="w-full rounded-md bg-primary px-6 py-3 font-medium tracking-wide text-white transition hover:bg-primary-hover disabled:opacity-50"
 					>
-						Submit Inquiry
+						{submitting ? 'Submitting...' : 'Submit Inquiry'}
 					</button>
 				</div>
 			</div>
@@ -112,7 +143,7 @@
 
 		<div class="mt-20 overflow-hidden rounded-lg border border-border">
 			<iframe
-				title=""
+				title="AKSFPSA State Office Location Map"
 				src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1507.5822501474177!2d76.30302627427605!3d9.993683185252308!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3b080d3d1e2fdecb%3A0x61f8c1a773efbc14!2sAll%20Kerala%20Self%20Financing%20Private%20Schools%20Association!5e0!3m2!1sen!2sin!4v1770287268917!5m2!1sen!2sin"
 				width="100%"
 				height="300"

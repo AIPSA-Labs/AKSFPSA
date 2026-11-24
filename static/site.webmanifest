@@ -1,0 +1,23 @@
+{
+  "name": "All Kerala Self Financing Private Schools Association",
+  "short_name": "AKSFPSA",
+  "description": "Statewide association representing private self-financing educational institutions across Kerala.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#800020",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

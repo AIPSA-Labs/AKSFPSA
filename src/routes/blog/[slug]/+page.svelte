@@ -3,8 +3,46 @@
 	import { page } from '$app/stores';
 	import { list } from '$lib/stores/api';
 	import type { BlogPost } from '$lib/stores/data';
+	import { SITE_CONFIG } from '$lib/constants/strings';
 
 	let post = $state<BlogPost | null>(null);
+
+	const blogPostingSchema = $derived(
+		post
+			? JSON.stringify({
+					'@context': 'https://schema.org',
+					'@type': 'BlogPosting',
+					headline: post.title,
+					description: post.excerpt,
+					datePublished: post.date,
+					author: {
+						'@type': 'Person',
+						name: post.author || SITE_CONFIG.SITE_NAME
+					},
+					publisher: {
+						'@type': 'EducationalOrganization',
+						name: SITE_CONFIG.SITE_NAME,
+						logo: {
+							'@type': 'ImageObject',
+							url: `${SITE_CONFIG.BASE_URL}/logo.png`
+						}
+					},
+					image: post.cover
+						? post.cover.startsWith('http')
+							? post.cover
+							: `${SITE_CONFIG.BASE_URL}${post.cover}`
+						: `${SITE_CONFIG.BASE_URL}/logo.png`,
+					mainEntityOfPage: {
+						'@type': 'WebPage',
+						'@id': `${SITE_CONFIG.BASE_URL}/blog/${post.slug}`
+					}
+				})
+			: ''
+	);
+
+	const blogPostingScript = $derived(
+		blogPostingSchema ? `<script type="application/ld+json">${blogPostingSchema}</` + `script>` : ''
+	);
 
 	onMount(async () => {
 		const posts = await list<BlogPost>('blog');
@@ -16,22 +54,42 @@
 	{#if post}
 		<title>{post.title} — AKSFPSA</title>
 		<meta name="description" content={post.excerpt} />
+		<link rel="canonical" href="{SITE_CONFIG.BASE_URL}/blog/{post.slug}" />
+		<meta property="og:title" content="{post.title} — AKSFPSA" />
+		<meta property="og:description" content={post.excerpt} />
+		<meta property="og:type" content="article" />
+		<meta property="og:url" content="{SITE_CONFIG.BASE_URL}/blog/{post.slug}" />
+		{#if post.cover}
+			<meta
+				property="og:image"
+				content={post.cover.startsWith('http')
+					? post.cover
+					: `${SITE_CONFIG.BASE_URL}${post.cover}`}
+			/>
+		{/if}
+		{#if blogPostingScript}
+			{@html blogPostingScript}
+		{/if}
 	{/if}
 </svelte:head>
 
-<section class="bg-background min-h-screen">
-	<div class="max-w-3xl mx-auto px-6 lg:px-8 py-20">
-		<a href="/blog" class="inline-flex items-center gap-1 text-sm text-primary hover:underline mb-8">← Back to Blog</a>
+<section class="min-h-screen bg-background">
+	<div class="mx-auto max-w-3xl px-6 py-20 lg:px-8">
+		<a href="/blog" class="mb-8 inline-flex items-center gap-1 text-sm text-primary hover:underline"
+			>← Back to Blog</a
+		>
 
 		{#if post}
 			<article>
-				<div class="flex flex-wrap gap-2 mb-4">
+				<div class="mb-4 flex flex-wrap gap-2">
 					{#each post.tags as tag}
-						<span class="rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">{tag}</span>
+						<span class="rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary"
+							>{tag}</span
+						>
 					{/each}
 				</div>
 
-				<h1 class="text-3xl font-semibold text-primary leading-tight">{post.title}</h1>
+				<h1 class="text-3xl leading-tight font-semibold text-primary">{post.title}</h1>
 
 				<div class="mt-4 flex items-center gap-4 text-sm text-text-muted">
 					<span>{post.date}</span>
@@ -40,12 +98,12 @@
 				</div>
 
 				{#if post.cover}
-					<div class="mt-8 rounded-xl overflow-hidden">
-						<img src={post.cover} alt={post.title} class="w-full h-64 object-cover" />
+					<div class="mt-8 overflow-hidden rounded-xl">
+						<img src={post.cover} alt={post.title} class="h-64 w-full object-cover" />
 					</div>
 				{/if}
 
-				<div class="mt-8 prose-content">
+				<div class="prose-content mt-8">
 					{@html post.content}
 				</div>
 			</article>

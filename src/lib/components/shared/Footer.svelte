@@ -1,6 +1,6 @@
 <script lang="ts">
 	//- Centralized strings and dimension constants
-	import { STRINGS, EDUCATOR_CTA_CONSTANTS } from '$lib/constants/strings';
+	import { STRINGS, EDUCATOR_CTA_CONSTANTS, SITE_CONFIG } from '$lib/constants/strings';
 	//- External link indicator
 	import { ExternalLink } from '@lucide/svelte';
 
@@ -26,6 +26,7 @@
 
 				<ul class="mt-6 space-y-3 text-sm text-text-muted">
 					<li><a href="/about" class="hover:text-primary">About</a></li>
+					<li><a href="/services" class="hover:text-primary">Services</a></li>
 					<li><a href="/membership" class="hover:text-primary">Membership</a></li>
 					<li><a href="/courses" class="hover:text-primary">Courses</a></li>
 					<li><a href="/events" class="hover:text-primary">Events</a></li>
@@ -97,11 +98,22 @@
 				<h3 class="text-sm font-semibold tracking-wide text-primary uppercase">Contact</h3>
 
 				<div class="mt-6 space-y-4 text-sm text-text-muted">
-					<p>Ernakulam, Kerala – 682001</p>
+					<p>
+						{SITE_CONFIG.OFFICE_ADDRESS.LOCALITY}, {SITE_CONFIG.OFFICE_ADDRESS.REGION} – {SITE_CONFIG
+							.OFFICE_ADDRESS.POSTAL_CODE}
+					</p>
 
-					<p>Email: info@association.org</p>
+					<p>
+						Email: <a href="mailto:{SITE_CONFIG.CONTACT_EMAIL}" class="hover:text-primary"
+							>{SITE_CONFIG.CONTACT_EMAIL}</a
+						>
+					</p>
 
-					<p>Phone: +91 98765 43210</p>
+					<p>
+						Phone: <a href={SITE_CONFIG.CONTACT_PHONE_TEL} class="hover:text-primary"
+							>{SITE_CONFIG.CONTACT_PHONE}</a
+						>
+					</p>
 
 					<p>
 						Office Hours:<br />

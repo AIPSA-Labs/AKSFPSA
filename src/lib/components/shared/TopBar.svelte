@@ -20,18 +20,30 @@
 <header class="sticky top-0 z-50 border-b border-border bg-background">
 	<div class="mx-auto max-w-7xl px-4 lg:px-8">
 		<div class="flex h-16 items-center justify-between">
-			<!-- Logo -->
-			<div class="flex items-center gap-3">
-				<div class="h-10 w-10 rounded-full">
-					<img src={Logo} alt="Logo" />
+			<!-- Logo & Site Identity -->
+			<a
+				href="/"
+				aria-label="AKSFPSA Homepage"
+				class="flex items-center gap-3 transition hover:opacity-90"
+			>
+				<div class="h-10 w-10 shrink-0 overflow-hidden rounded-full">
+					<img
+						src={Logo}
+						alt="AKSFPSA - All Kerala Self Financing Private Schools Association Logo"
+						width="40"
+						height="40"
+						loading="eager"
+						decoding="async"
+						class="h-full w-full object-contain"
+					/>
 				</div>
 				<div>
-					<h1 class="text-lg leading-tight font-bold text-primary">AKSFPSA</h1>
+					<span class="block text-lg leading-tight font-bold text-primary">AKSFPSA</span>
 					<p class="hidden text-xs text-text-muted sm:block">
 						All Kerala Self Financing Private Schools Association
 					</p>
 				</div>
-			</div>
+			</a>
 
 			<!-- Desktop Nav -->
 			<div class="hidden items-center gap-4 md:flex">

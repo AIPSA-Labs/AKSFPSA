@@ -6,8 +6,11 @@
 <Reveal>
 	<section class="relative overflow-hidden bg-background">
 		<div class="relative z-10 mx-auto max-w-7xl px-6 py-20 lg:px-8 lg:py-28">
-			<p class="mb-6 max-w-xl text-xs font-medium tracking-widest text-primary uppercase leading-relaxed">
-				Representing Private Schools Across Kerala as Part of the All India Private Schools Association Network
+			<p
+				class="mb-6 max-w-xl text-xs leading-relaxed font-medium tracking-widest text-primary uppercase"
+			>
+				Representing Private Schools Across Kerala as Part of the All India Private Schools
+				Association Network
 			</p>
 
 			<h1 class="max-w-xl text-4xl leading-tight font-semibold text-primary lg:text-5xl">
@@ -38,7 +41,16 @@
 
 		<!-- Satellite Image Layer -->
 		<div class="pointer-events-none absolute inset-y-0 right-0 hidden w-1/2 lg:block">
-			<img src={Kerala} alt="Kerala Satellite View" class="h-full w-full object-cover opacity-60" />
+			<img
+				src={Kerala}
+				alt="Satellite map view of Kerala representing statewide private self-financing schools network"
+				loading="eager"
+				fetchpriority="high"
+				decoding="async"
+				width="960"
+				height="720"
+				class="h-full w-full object-cover opacity-60"
+			/>
 
 			<!-- Maroon Overlay -->
 			<div class="absolute inset-0 bg-primary/20 mix-blend-multiply"></div>

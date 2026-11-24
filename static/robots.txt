@@ -1,3 +1,13 @@
-# allow crawling everything by default
+# =============================================================================
+# Robots.txt for All Kerala Self-Financing Private Schools Association (AKSFPSA)
+# Official Website: https://www.allkeralaprivateschools.org
+# =============================================================================
+
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+Disallow: /api/
+
+# Sitemap Location
+Sitemap: https://www.allkeralaprivateschools.org/sitemap.xml

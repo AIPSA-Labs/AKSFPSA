@@ -3,12 +3,53 @@
 	import { page } from '$app/stores';
 	import { list } from '$lib/stores/api';
 	import type { BlogPost } from '$lib/stores/data';
+	import { SITE_CONFIG } from '$lib/constants/strings';
 
 	let event = $state<BlogPost | null>(null);
 
+	const eventSchema = $derived(
+		event
+			? JSON.stringify({
+					'@context': 'https://schema.org',
+					'@type': 'Event',
+					name: event.title,
+					description: event.excerpt,
+					startDate: event.date,
+					eventStatus: 'https://schema.org/EventScheduled',
+					eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+					location: {
+						'@type': 'Place',
+						name: 'Kerala, India',
+						address: {
+							'@type': 'PostalAddress',
+							addressRegion: 'Kerala',
+							addressCountry: 'IN'
+						}
+					},
+					organizer: {
+						'@type': 'EducationalOrganization',
+						name: SITE_CONFIG.SITE_NAME,
+						url: SITE_CONFIG.BASE_URL
+					},
+					image: event.cover
+						? event.cover.startsWith('http')
+							? event.cover
+							: `${SITE_CONFIG.BASE_URL}${event.cover}`
+						: `${SITE_CONFIG.BASE_URL}/logo.png`
+				})
+			: ''
+	);
+
+	const eventScript = $derived(
+		eventSchema ? `<script type="application/ld+json">${eventSchema}</` + `script>` : ''
+	);
+
 	onMount(async () => {
 		const posts = await list<BlogPost>('blog');
-		event = posts.find((p) => p.status === 'published' && p.type === 'event' && p.slug === $page.params.slug) ?? null;
+		event =
+			posts.find(
+				(p) => p.status === 'published' && p.type === 'event' && p.slug === $page.params.slug
+			) ?? null;
 	});
 </script>
 
@@ -16,22 +57,44 @@
 	{#if event}
 		<title>{event.title} — AKSFPSA Events</title>
 		<meta name="description" content={event.excerpt} />
+		<link rel="canonical" href="{SITE_CONFIG.BASE_URL}/events/{event.slug}" />
+		<meta property="og:title" content="{event.title} — AKSFPSA Events" />
+		<meta property="og:description" content={event.excerpt} />
+		<meta property="og:type" content="article" />
+		<meta property="og:url" content="{SITE_CONFIG.BASE_URL}/events/{event.slug}" />
+		{#if event.cover}
+			<meta
+				property="og:image"
+				content={event.cover.startsWith('http')
+					? event.cover
+					: `${SITE_CONFIG.BASE_URL}${event.cover}`}
+			/>
+		{/if}
+		{#if eventScript}
+			{@html eventScript}
+		{/if}
 	{/if}
 </svelte:head>
 
-<section class="bg-background min-h-screen">
-	<div class="max-w-3xl mx-auto px-6 lg:px-8 py-20">
-		<a href="/events" class="inline-flex items-center gap-1 text-sm text-primary hover:underline mb-8">← Back to Events</a>
+<section class="min-h-screen bg-background">
+	<div class="mx-auto max-w-3xl px-6 py-20 lg:px-8">
+		<a
+			href="/events"
+			class="mb-8 inline-flex items-center gap-1 text-sm text-primary hover:underline"
+			>← Back to Events</a
+		>
 
 		{#if event}
 			<article>
-				<div class="flex flex-wrap gap-2 mb-4">
+				<div class="mb-4 flex flex-wrap gap-2">
 					{#each event.tags as tag}
-						<span class="rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">{tag}</span>
+						<span class="rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary"
+							>{tag}</span
+						>
 					{/each}
 				</div>
 
-				<h1 class="text-3xl font-semibold text-primary leading-tight">{event.title}</h1>
+				<h1 class="text-3xl leading-tight font-semibold text-primary">{event.title}</h1>
 
 				<div class="mt-4 flex items-center gap-4 text-sm text-text-muted">
 					<span>{event.date}</span>
@@ -40,12 +103,12 @@
 				</div>
 
 				{#if event.cover}
-					<div class="mt-8 rounded-xl overflow-hidden">
-						<img src={event.cover} alt={event.title} class="w-full h-64 object-cover" />
+					<div class="mt-8 overflow-hidden rounded-xl">
+						<img src={event.cover} alt={event.title} class="h-64 w-full object-cover" />
 					</div>
 				{/if}
 
-				<div class="mt-8 prose-content">
+				<div class="prose-content mt-8">
 					{@html event.content}
 				</div>
 			</article>
@@ -53,7 +116,7 @@
 			<div class="mt-12">
 				<a
 					href="/contact"
-					class="inline-block bg-primary text-white px-8 py-3 rounded-md font-medium tracking-wide hover:bg-primary-hover transition"
+					class="inline-block rounded-md bg-primary px-8 py-3 font-medium tracking-wide text-white transition hover:bg-primary-hover"
 				>
 					Register / Enquire
 				</a>
@@ -61,10 +124,11 @@
 		{:else}
 			<div class="mt-12 text-center text-text-muted">
 				<p>Event not found.</p>
-				<a href="/events" class="mt-2 inline-block text-primary hover:underline">Browse all events</a>
+				<a href="/events" class="mt-2 inline-block text-primary hover:underline"
+					>Browse all events</a
+				>
 			</div>
 		{/if}
-
 	</div>
 </section>
 

@@ -16,28 +16,45 @@
 	const partners: Partner[] = [
 		{
 			name: 'Varthana Finance',
-			logo: 'https://picsum.photos/seed/varthana/200/80',
+			logo: 'https://olkuydfcpymlqegqeery.supabase.co/storage/v1/object/public/images/others/Varthana%20Higher%20Resolution%202022%20(1).jpg',
 			description:
-				'Providing structured financial solutions supporting infrastructure and institutional growth.',
-			url: 'https://www.varthana.com'
+				'Providing specialized financial solutions supporting school infrastructure and institutional growth across India.',
+			url: 'https://varthana.com/school/apply?utm_source=+AIPSA&utm_medium=Website'
 		},
 		{
-			name: 'EduCert India',
-			logo: 'https://picsum.photos/seed/educert/200/80',
-			description: 'Certification and teacher development programs.',
-			url: 'https://example.com'
+			name: 'Axis Finance Limited',
+			logo: 'https://olkuydfcpymlqegqeery.supabase.co/storage/v1/object/public/images/others/Axis-Finance-Limited-5-removebg-preview.png',
+			description:
+				'Extending institutional growth loans and institutional development funds for private educational institutions.',
+			url: 'https://www.axisbank.com'
 		},
 		{
-			name: 'SchoolTech Solutions',
-			logo: 'https://picsum.photos/seed/schooltech/200/80',
-			description: 'Digital infrastructure for schools.',
-			url: 'https://example.com'
+			name: 'Cambridge University Press & Assessment',
+			logo: 'https://www.cambridge.org/sites/default/files/navigation_logos/cambridge-university-press-and-assessment%401x_2_0.png',
+			description:
+				'World-leading educational resources, curriculum frameworks, and globally recognized assessments.',
+			url: 'https://www.cambridge.org/'
 		},
 		{
-			name: 'Kerala Edu Network',
-			logo: 'https://picsum.photos/seed/keralanet/200/80',
-			description: 'Collaborative educational initiatives.',
-			url: 'https://example.com'
+			name: 'Tata ClassEdge',
+			logo: 'https://www.tataclassedgeonline.com/classedge-v4-theme/images/classedge/logo.png',
+			description:
+				'Innovative technology-based learning solutions, smart classroom platforms, and pedagogical planning tools.',
+			url: 'https://www.tataclassedgeonline.com/'
+		},
+		{
+			name: 'Britannica Education',
+			logo: 'https://cdn.britannica.com/mendel/eb-logo/MendelNewThistleLogo.png',
+			description:
+				'Globally recognized knowledge repository and authoritative curriculum resources supporting educators and learners.',
+			url: 'https://www.britannica.com'
+		},
+		{
+			name: 'Matific',
+			logo: 'https://www.matific.com/home/resources/media/images-2/Logo.svg',
+			description:
+				'Interactive, pedagogically designed mathematics learning platform empowering conceptual foundation.',
+			url: 'https://www.matific.com/in/en-gb/home/'
 		}
 	];
 
@@ -51,7 +68,9 @@
 	let lastX = 0;
 
 	async function setup() {
-		if (!browser || !track) return;
+		if (!browser || !track) {
+			return;
+		}
 		await tick();
 		contentWidth = track.scrollWidth / 2;
 	}
@@ -79,14 +98,20 @@
 	}
 
 	function onPointerMove(e: PointerEvent) {
-		if (!isDragging || !track) return;
+		if (!isDragging || !track) {
+			return;
+		}
 
 		const delta = e.clientX - lastX;
 		lastX = e.clientX;
 		position += delta;
 
-		if (position > 0) position -= contentWidth;
-		if (Math.abs(position) >= contentWidth) position += contentWidth;
+		if (position > 0) {
+			position -= contentWidth;
+		}
+		if (Math.abs(position) >= contentWidth) {
+			position += contentWidth;
+		}
 
 		track.style.transform = `translateX(${position}px)`;
 	}
@@ -97,23 +122,31 @@
 
 	function openPartner(partner: Partner) {
 		selected = partner;
-		if (browser) document.body.style.overflow = 'hidden';
+		if (browser) {
+			document.body.style.overflow = 'hidden';
+		}
 	}
 
 	function closePartner() {
 		selected = null;
-		if (browser) document.body.style.overflow = '';
+		if (browser) {
+			document.body.style.overflow = '';
+		}
 	}
 
 	onMount(async () => {
-		if (!browser) return;
+		if (!browser) {
+			return;
+		}
 		await setup();
 		animationId = requestAnimationFrame(animate);
 		window.addEventListener('resize', setup);
 	});
 
 	onDestroy(() => {
-		if (!browser) return;
+		if (!browser) {
+			return;
+		}
 		cancelAnimationFrame(animationId);
 		window.removeEventListener('resize', setup);
 		document.body.style.overflow = '';
@@ -192,11 +225,7 @@
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-6 backdrop-blur-sm"
 	>
 		<div class="relative w-full max-w-2xl rounded-xl border border-border bg-background p-10">
-			<button
-				type="button"
-				class="absolute top-4 right-6 text-primary"
-				on:click={closePartner}
-			>
+			<button type="button" class="absolute top-4 right-6 text-primary" on:click={closePartner}>
 				<X size={24} />
 			</button>
 
