@@ -104,15 +104,15 @@ export async function POST({ params, request }) {
 
 function getColumns(entity: string): string[] {
 	const colMap: Record<string, string[]> = {
-		circulars: ['title', 'date', 'category', 'file'],
+		circulars: ['title', 'date', 'category', 'file', 'content'],
 		blog: ['title', 'slug', 'excerpt', 'content', 'author', 'date', 'status', 'cover', 'tags', 'type'],
-		courses: ['title', 'category', 'duration', 'mode', 'description', 'link'],
-		events: ['slug', 'title', 'date', 'location', 'type', 'description'],
+		courses: ['title', 'category', 'duration', 'mode', 'description', 'link', 'content'],
+		events: ['slug', 'title', 'date', 'location', 'type', 'description', 'content'],
 		gallery: ['slug', 'title', 'date', 'category', 'cover', 'description'],
 		'gallery-images': ['album_id', 'src', 'alt'],
 		leaders: ['name', 'role', 'district', 'image', 'group'],
 		members: ['name', 'district', 'category', 'since'],
-		services: ['title', 'description', 'icon', 'order'],
+		services: ['title', 'description', 'icon', 'order', 'content'],
 		faqs: ['question', 'answer', 'order'],
 		files: ['name', 'type', 'size', 'data', 'date'],
 		'gallery-categories': ['name'],

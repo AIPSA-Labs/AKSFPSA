@@ -70,17 +70,17 @@ export async function PUT({ params, request }) {
 	}
 
 	const body = await request.json();
-	delete body.id;
-	delete body.created_at;
-	delete body.updated_at;
+	const allowedCols = getColumns(params.entity);
+	const validKeys = Object.keys(body).filter(
+		(k) => allowedCols.includes(k) && k !== 'id' && k !== 'created_at' && k !== 'updated_at'
+	);
 
-	const keys = Object.keys(body);
-	if (keys.length === 0) {
+	if (validKeys.length === 0) {
 		return json({ error: 'No fields to update' }, { status: 400 });
 	}
 
-	const cols = keys.map((k) => `${k.startsWith('"') ? k : `"${k}"`}`).join(', ');
-	const vals = keys.map((k) => body[k]);
+	const cols = validKeys.map((k) => `"${k.replace(/"/g, '""')}"`).join(', ');
+	const vals = validKeys.map((k) => body[k]);
 	const placeholders = vals.map((_, i) => `$${i + 1}`).join(', ');
 
 	const query = `UPDATE ${meta.table} SET (${cols}) = (${placeholders}) WHERE ${meta.id === 'slug' ? 'slug' : 'id'} = $${vals.length + 1} RETURNING *`;
@@ -90,6 +90,13 @@ export async function PUT({ params, request }) {
 	if (!updated) {
 		return json({ error: 'Not found' }, { status: 404 });
 	}
+
+	if (params.entity === 'gallery') {
+		(updated as Record<string, unknown>).images = await sql`
+			SELECT * FROM gallery_images WHERE album_id = ${(updated as Record<string, unknown>).id} ORDER BY id
+		`;
+	}
+
 	return json(updated);
 }
 
@@ -146,4 +153,24 @@ function extractR2Key(url: unknown): string | null {
 	} catch {
 		return null;
 	}
+}
+
+function getColumns(entity: string): string[] {
+	const colMap: Record<string, string[]> = {
+		circulars: ['title', 'date', 'category', 'file', 'content'],
+		blog: ['title', 'slug', 'excerpt', 'content', 'author', 'date', 'status', 'cover', 'tags', 'type'],
+		courses: ['title', 'category', 'duration', 'mode', 'description', 'link', 'content'],
+		events: ['slug', 'title', 'date', 'location', 'type', 'description', 'content'],
+		gallery: ['slug', 'title', 'date', 'category', 'cover', 'description'],
+		'gallery-images': ['album_id', 'src', 'alt'],
+		leaders: ['name', 'role', 'district', 'image', 'group'],
+		members: ['name', 'district', 'category', 'since'],
+		services: ['title', 'description', 'icon', 'order', 'content'],
+		faqs: ['question', 'answer', 'order'],
+		files: ['name', 'type', 'size', 'data', 'date'],
+		'gallery-categories': ['name'],
+		'contact-info': ['address', 'email', 'phones', 'hours'],
+		'contact-submissions': ['name', 'institution', 'email', 'phone', 'message', 'date', 'status', 'notes', 'source']
+	};
+	return colMap[entity] || [];
 }

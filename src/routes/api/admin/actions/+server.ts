@@ -1,3 +1,4 @@
+//- Admin Activity Log API Endpoints
 import { json } from '@sveltejs/kit';
 import { sql } from '$lib/server/db';
 
@@ -10,7 +11,9 @@ export async function POST({ request }) {
 	const body = await request.json();
 	const text = String(body.text || '').trim();
 	const entity = String(body.entity || '').trim();
-	if (!text) return json({ error: 'text is required' }, { status: 400 });
+	if (!text) {
+		return json({ error: 'text is required' }, { status: 400 });
+	}
 
 	const [created] = await sql`
 		INSERT INTO admin_actions (text, entity)
