@@ -1,6 +1,5 @@
 //- AIPSA PostgreSQL & REST Database Client Driver
 import { env } from '$env/dynamic/private';
-import postgres from 'postgres';
 
 //- Default database configuration values
 const DEFAULT_ENDPOINT = 'https://db.aipsa.in/api/v1/projects/29eb3d366ca21009108443bf8d356f28';
@@ -183,10 +182,10 @@ async function executeRawQuery<T = unknown>(query: string, params: unknown[] = [
 		return rows.map((r) => formatRow(r));
 	}
 
-	//- Fallback for direct PostgreSQL TCP connection string
-	const client = postgres(dbUrl, { ssl: 'require' });
-	const rows = await client.unsafe(query, params as any[]);
-	return (rows as unknown) as T[];
+	//- Direct TCP fallback error when HTTP endpoint is not used
+	throw new Error(
+		`Direct PostgreSQL TCP connection is not supported in Cloudflare Workers. Please configure DATABASE_URL with the AIPSA REST endpoint (https://db.aipsa.in/api/v1/projects/...)`
+	);
 }
 
 //- Execute an SqlFragment
