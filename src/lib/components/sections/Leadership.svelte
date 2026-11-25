@@ -1,37 +1,36 @@
 <script lang="ts">
-	type Leader = {
-		name: string;
-		role: string;
-		image: string;
-		district?: string;
-	};
+	import { onMount } from 'svelte';
+	import { list } from '$lib/stores/api';
+	import type { Leader } from '$lib/stores/data';
+	import { STRINGS } from '$lib/constants/strings';
 
-	const leaders: Leader[] = [
-		{
-			name: 'Mr. John Mathew',
-			role: 'President',
-			image: 'https://picsum.photos/seed/president/200/200',
-			district: 'Kozhikode'
-		},
-		{
-			name: 'Mrs. Anjali Nair',
-			role: 'General Secretary',
-			image: 'https://picsum.photos/seed/secretary/200/200',
-			district: 'Malappuram'
-		},
-		{
-			name: 'Mr. Rahim Khan',
-			role: 'Treasurer',
-			image: 'https://picsum.photos/seed/treasurer/200/200',
-			district: 'Ernakulam'
-		},
-		{
-			name: 'Mr. Suresh Kumar',
-			role: 'Joint Secretary',
-			image: 'https://picsum.photos/seed/jointsecretary/200/200',
-			district: 'Thrissur'
+	// - Maximum number of leaders displayed on the home page
+	const HOME_LEADERS_LIMIT = 4;
+
+	let leaders = $state<Leader[]>([]);
+	let loading = $state(true);
+
+	onMount(async () => {
+		try {
+			const items = await list<Leader>('leaders');
+			const officeBearers = items.filter((l) => l.group === 'office-bearers');
+			const pool = officeBearers.length > 0 ? officeBearers : items;
+			leaders = pool.slice(0, HOME_LEADERS_LIMIT);
+		} catch {
+			leaders = [];
+		} finally {
+			loading = false;
 		}
-	];
+	});
+
+	function getInitials(name: string): string {
+		return name
+			.split(' ')
+			.filter(Boolean)
+			.slice(0, 2)
+			.map((part) => part[0]?.toUpperCase() || '')
+			.join('');
+	}
 </script>
 
 <section class="bg-background">
@@ -47,39 +46,49 @@
 			</p>
 		</div>
 
-		<div class="mt-16 grid gap-12 sm:grid-cols-2 lg:grid-cols-4">
-			{#each leaders as leader}
-				<div class="text-center">
-					<div
-						class="mx-auto h-36 w-36 overflow-hidden rounded-full border border-border bg-surface"
-					>
-						<img
-							src={leader.image}
-							alt={leader.name}
-							width="144"
-							height="144"
-							loading="lazy"
-							decoding="async"
-							class="h-full w-full object-cover"
-						/>
-					</div>
+		{#if loading}
+			<div class="mt-16 text-center text-sm text-text-muted">Loading leadership...</div>
+		{:else if leaders.length === 0}
+			<div class="mt-16 text-center text-sm text-text-muted">{STRINGS.LEADERS_EMPTY}</div>
+		{:else}
+			<div class="mt-16 grid gap-12 sm:grid-cols-2 lg:grid-cols-4">
+				{#each leaders as leader}
+					<div class="text-center">
+						<div
+							class="mx-auto flex h-36 w-36 items-center justify-center overflow-hidden rounded-full border border-border bg-surface"
+						>
+							{#if leader.image}
+								<img
+									src={leader.image}
+									alt={leader.name}
+									width="144"
+									height="144"
+									loading="lazy"
+									decoding="async"
+									class="h-full w-full object-cover"
+								/>
+							{:else}
+								<span class="text-2xl font-semibold text-primary">{getInitials(leader.name)}</span>
+							{/if}
+						</div>
 
-					<h3 class="mt-6 text-lg font-semibold text-primary">
-						{leader.name}
-					</h3>
+						<h3 class="mt-6 text-lg font-semibold text-primary">
+							{leader.name}
+						</h3>
 
-					<p class="mt-2 text-sm tracking-wide text-text-muted uppercase">
-						{leader.role}
-					</p>
-
-					{#if leader.district}
-						<p class="mt-1 text-xs text-text-muted">
-							{leader.district}
+						<p class="mt-2 text-sm tracking-wide text-text-muted uppercase">
+							{leader.role}
 						</p>
-					{/if}
-				</div>
-			{/each}
-		</div>
+
+						{#if leader.district}
+							<p class="mt-1 text-xs text-text-muted">
+								{leader.district}
+							</p>
+						{/if}
+					</div>
+				{/each}
+			</div>
+		{/if}
 
 		<div class="mt-16">
 			<a

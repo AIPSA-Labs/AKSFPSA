@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { create } from '$lib/stores/api';
-	import type { ContactSubmission } from '$lib/stores/data';
-	import { SITE_CONFIG } from '$lib/constants/strings';
+	import { onMount } from 'svelte';
+	import { create, get } from '$lib/stores/api';
+	import type { ContactInfo, ContactSubmission } from '$lib/stores/data';
+	import { SITE_CONFIG, STRINGS } from '$lib/constants/strings';
 
 	let form = $state({
 		name: '',
@@ -11,11 +12,23 @@
 		message: ''
 	});
 
+	let contactInfo = $state<ContactInfo | null>(null);
 	let submitted = $state(false);
 	let submitting = $state(false);
+	let submitError = $state('');
+
+	onMount(async () => {
+		try {
+			contactInfo = await get<ContactInfo>('contact-info', 1);
+		} catch {
+			contactInfo = null;
+		}
+	});
 
 	async function submit() {
 		submitting = true;
+		submitError = '';
+		submitted = false;
 		try {
 			await create<ContactSubmission>('contact-submissions', {
 				...form,
@@ -28,12 +41,12 @@
 				notes: '',
 				source: 'website'
 			});
-		} catch {
-			//- Continue gracefully if offline or mock environment
-		} finally {
-			submitting = false;
 			submitted = true;
 			form = { name: '', institution: '', email: '', phone: '', message: '' };
+		} catch {
+			submitError = STRINGS.CONTACT_SUBMIT_ERROR;
+		} finally {
+			submitting = false;
 		}
 	}
 
@@ -78,32 +91,52 @@
 			<div class="space-y-8">
 				<div>
 					<h2 class="text-xl font-semibold text-primary">Registered Office</h2>
-					<p class="mt-4 text-text-muted">
-						{SITE_CONFIG.SITE_NAME}<br />
-						{SITE_CONFIG.OFFICE_ADDRESS.STREET}<br />
-						{SITE_CONFIG.OFFICE_ADDRESS.LOCALITY}, {SITE_CONFIG.OFFICE_ADDRESS.REGION} – {SITE_CONFIG
-							.OFFICE_ADDRESS.POSTAL_CODE}
+					<p class="mt-4 whitespace-pre-line text-text-muted">
+						{#if contactInfo?.address}
+							{contactInfo.address}
+						{:else}
+							{SITE_CONFIG.SITE_NAME}<br />
+							{SITE_CONFIG.OFFICE_ADDRESS.STREET}<br />
+							{SITE_CONFIG.OFFICE_ADDRESS.LOCALITY}, {SITE_CONFIG.OFFICE_ADDRESS.REGION} – {SITE_CONFIG
+								.OFFICE_ADDRESS.POSTAL_CODE}
+						{/if}
 					</p>
 				</div>
 
 				<div>
 					<h2 class="text-xl font-semibold text-primary">Contact Details</h2>
 					<p class="mt-4 text-text-muted">
-						Email: <a href="mailto:{SITE_CONFIG.CONTACT_EMAIL}" class="hover:text-primary"
-							>{SITE_CONFIG.CONTACT_EMAIL}</a
-						><br />
-						Phone:
-						<a href={SITE_CONFIG.CONTACT_PHONE_TEL} class="hover:text-primary"
-							>{SITE_CONFIG.CONTACT_PHONE}</a
+						Email:
+						<a
+							href="mailto:{contactInfo?.email || SITE_CONFIG.CONTACT_EMAIL}"
+							class="hover:text-primary"
 						>
+							{contactInfo?.email || SITE_CONFIG.CONTACT_EMAIL}
+						</a>
+						<br />
+						Phone:
+						{#if contactInfo?.phones && contactInfo.phones.length > 0}
+							{#each contactInfo.phones as phone, idx}
+								{#if idx > 0}, {/if}
+								<a href="tel:{phone.replace(/\s+/g, '')}" class="hover:text-primary">{phone}</a>
+							{/each}
+						{:else}
+							<a href={SITE_CONFIG.CONTACT_PHONE_TEL} class="hover:text-primary"
+								>{SITE_CONFIG.CONTACT_PHONE}</a
+							>
+						{/if}
 					</p>
 				</div>
 
 				<div>
 					<h2 class="text-xl font-semibold text-primary">Office Hours</h2>
-					<p class="mt-4 text-text-muted">
-						Monday – Friday<br />
-						10:00 AM – 5:00 PM
+					<p class="mt-4 whitespace-pre-line text-text-muted">
+						{#if contactInfo?.hours}
+							{contactInfo.hours}
+						{:else}
+							Monday – Friday<br />
+							10:00 AM – 5:00 PM
+						{/if}
 					</p>
 				</div>
 			</div>
@@ -117,6 +150,14 @@
 					>
 						Thank you! Your inquiry has been submitted to the association office. We will get in
 						touch shortly.
+					</div>
+				{/if}
+
+				{#if submitError}
+					<div
+						class="mt-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+					>
+						{submitError}
 					</div>
 				{/if}
 

@@ -130,7 +130,17 @@ export const STRINGS = {
 	FOOTER_AITF: 'All India Teachers Federation (AITF)',
 	FOOTER_LEGAL_SERVICES: 'United Law Advocates (Legal Counsel)',
 	FOOTER_MONTVILLE: 'Montville Preschool Project',
-	FOOTER_VISION_2047: 'Vision 2047: Vikasit Bharat'
+	FOOTER_VISION_2047: 'Vision 2047: Vikasit Bharat',
+
+	// - Empty states and error messages
+	CIRCULARS_EMPTY: 'No circulars have been published yet.',
+	COURSES_EMPTY: 'No courses are available right now.',
+	LEADERS_EMPTY: 'Executive committee details will be updated soon.',
+	GALLERY_EMPTY: 'No gallery albums have been published yet.',
+	FAQS_EMPTY: 'No frequently asked questions are available right now.',
+	CONTACT_SUBMIT_ERROR: 'We could not send your message right now. Please try again in a moment.',
+	MEMBERSHIP_SUBMIT_ERROR: 'We could not submit your application right now. Please try again in a moment.',
+	MEMBERSHIP_SUBMIT_SUCCESS: 'Your membership application has been submitted. Our team will review it and get in touch with you.'
 };
 
 //- Layout and display constants

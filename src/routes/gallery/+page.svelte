@@ -5,12 +5,22 @@
 	import { Image as ImageIcon } from '@lucide/svelte';
 
 	let albums = $state<GalleryAlbum[]>([]);
-	let categories = $state<string[]>(['Conference', 'Meeting', 'Workshop']);
+	let categories = $state<string[]>([]);
 	let search = $state('');
 	let catFilter = $state('All');
 
 	onMount(async () => {
-		albums = await list<GalleryAlbum>('gallery');
+		try {
+			const [albumList, catList] = await Promise.all([
+				list<GalleryAlbum>('gallery'),
+				list<{ id: number; name: string }>('gallery-categories')
+			]);
+			albums = albumList;
+			categories = catList.map((c) => c.name).sort((a, b) => a.localeCompare(b));
+		} catch {
+			albums = [];
+			categories = [];
+		}
 	});
 
 	const filtered = $derived(

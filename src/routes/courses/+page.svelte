@@ -65,7 +65,7 @@
 					excerpt="{course.description}\nDuration: {course.duration} • Mode: {course.mode}"
 					content={course.content || ''}
 					ctaLabel="View Details"
-					ctaHref={course.link}
+					ctaHref={course.link || `/courses/${course.id}`}
 					category={course.category}
 				/>
 			{/each}

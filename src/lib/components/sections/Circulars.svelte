@@ -1,42 +1,25 @@
 <script lang="ts">
-	type Circular = {
-		id: number;
-		title: string;
-		date: string;
-		category: string;
-		file: string;
-	};
+	import { onMount } from 'svelte';
+	import { list } from '$lib/stores/api';
+	import type { Circular } from '$lib/stores/data';
+	import { STRINGS } from '$lib/constants/strings';
 
-	const circulars: Circular[] = [
-		{
-			id: 1,
-			title: 'Guidelines for Academic Year 2026–27',
-			date: '12 January 2026',
-			category: 'Administrative',
-			file: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'
-		},
-		{
-			id: 2,
-			title: 'District-Level Coordination Meeting Notice',
-			date: '28 December 2025',
-			category: 'Meeting Notice',
-			file: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'
-		},
-		{
-			id: 3,
-			title: 'Financial Partnership Update – Institutional Funding',
-			date: '10 December 2025',
-			category: 'Finance',
-			file: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'
-		},
-		{
-			id: 4,
-			title: 'Teacher Certification Program Announcement',
-			date: '25 November 2025',
-			category: 'Training',
-			file: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'
+	// - Maximum number of circulars displayed on the home page
+	const HOME_CIRCULARS_LIMIT = 4;
+
+	let circulars = $state<Circular[]>([]);
+	let loading = $state(true);
+
+	onMount(async () => {
+		try {
+			const items = await list<Circular>('circulars');
+			circulars = items.slice(0, HOME_CIRCULARS_LIMIT);
+		} catch {
+			circulars = [];
+		} finally {
+			loading = false;
 		}
-	];
+	});
 </script>
 
 <section class="bg-background">
@@ -55,34 +38,40 @@
 		</div>
 
 		<div class="mt-16 overflow-hidden rounded-lg border border-border">
-			{#each circulars as circular, index}
-				<a
-					href={circular.file}
-					target="_blank"
-					rel="noopener noreferrer"
-					class={`flex flex-col justify-between p-6 transition hover:bg-surface md:flex-row md:items-center ${
-						index !== circulars.length - 1 ? 'border-b border-border' : ''
-					}`}
-				>
-					<div class="space-y-2">
-						<span class="text-xs tracking-wide text-text-muted uppercase">
-							{circular.category}
+			{#if loading}
+				<div class="p-8 text-center text-sm text-text-muted">Loading circulars...</div>
+			{:else if circulars.length === 0}
+				<div class="p-8 text-center text-sm text-text-muted">{STRINGS.CIRCULARS_EMPTY}</div>
+			{:else}
+				{#each circulars as circular, index}
+					<a
+						href={circular.file}
+						target="_blank"
+						rel="noopener noreferrer"
+						class={`flex flex-col justify-between p-6 transition hover:bg-surface md:flex-row md:items-center ${
+							index !== circulars.length - 1 ? 'border-b border-border' : ''
+						}`}
+					>
+						<div class="space-y-2">
+							<span class="text-xs tracking-wide text-text-muted uppercase">
+								{circular.category}
+							</span>
+
+							<h3 class="text-lg font-semibold text-primary">
+								{circular.title}
+							</h3>
+
+							<p class="text-sm text-text-muted">
+								{circular.date}
+							</p>
+						</div>
+
+						<span class="mt-4 text-sm font-medium tracking-wide text-primary uppercase md:mt-0">
+							View PDF
 						</span>
-
-						<h3 class="text-lg font-semibold text-primary">
-							{circular.title}
-						</h3>
-
-						<p class="text-sm text-text-muted">
-							{circular.date}
-						</p>
-					</div>
-
-					<span class="mt-4 text-sm font-medium tracking-wide text-primary uppercase md:mt-0">
-						View PDF
-					</span>
-				</a>
-			{/each}
+					</a>
+				{/each}
+			{/if}
 		</div>
 
 		<div class="mt-16">

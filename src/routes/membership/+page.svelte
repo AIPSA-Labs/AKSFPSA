@@ -1,4 +1,9 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+	import { list } from '$lib/stores/api';
+	import type { FAQ } from '$lib/stores/data';
+	import { STRINGS } from '$lib/constants/strings';
+
 	type Category = {
 		title: string;
 		fee: string;
@@ -8,83 +13,63 @@
 
 	const categories: Category[] = [
 		{
-			title: "Recognized Member Institution",
-			fee: "₹5,000 (Annual)",
+			title: 'Recognized Member Institution',
+			fee: '₹5,000 (Annual)',
 			description:
-				"For institutions aligned with the association framework and actively participating in its initiatives.",
+				'For institutions aligned with the association framework and actively participating in its initiatives.',
 			features: [
-				"Full representation privileges",
-				"Access to all circulars and meetings",
-				"Eligibility for training & certification programs",
-				"Participation in financial partnership programs"
+				'Full representation privileges',
+				'Access to all circulars and meetings',
+				'Eligibility for training & certification programs',
+				'Participation in financial partnership programs'
 			]
 		},
 		{
-			title: "Associate Member Institution",
-			fee: "₹5,000 (Annual Renewal)",
+			title: 'Associate Member Institution',
+			fee: '₹5,000 (Annual Renewal)',
 			description:
-				"For institutions seeking structured support and engagement with the association network.",
+				'For institutions seeking structured support and engagement with the association network.',
 			features: [
-				"Access to selected programs",
-				"Participation in district-level events",
-				"Upgrade option to recognized membership"
+				'Access to selected programs',
+				'Participation in district-level events',
+				'Upgrade option to recognized membership'
 			]
 		}
 	];
 
-    type FAQ = {
-	question: string;
-	answer: string;
-};
+	let faqs = $state<FAQ[]>([]);
+	let loadingFaqs = $state(true);
+	let openIndex = $state<number | null>(null);
 
-const faqs: FAQ[] = [
-	{
-		question: "Who is eligible for membership?",
-		answer:
-			"Private self-financing educational institutions operating within Kerala are eligible to apply for membership under the association framework."
-	},
-	{
-		question: "Is the membership fee refundable?",
-		answer:
-			"Membership contributions are non-refundable once the application has been reviewed and approved by the executive committee."
-	},
-	{
-		question: "How long does the approval process take?",
-		answer:
-			"Applications are typically reviewed within 7–14 working days, subject to verification of submitted information."
-	},
-	{
-		question: "Can membership be upgraded?",
-		answer:
-			"Yes. Associate member institutions may upgrade to recognized membership status upon fulfilling eligibility criteria."
-	},
-	{
-		question: "Will members receive official certification?",
-		answer:
-			"Recognized member institutions receive formal association recognition documentation upon approval."
-	}
-];
-
-const faqSchema = {
-	'@context': 'https://schema.org',
-	'@type': 'FAQPage',
-	mainEntity: faqs.map((f) => ({
-		'@type': 'Question',
-		name: f.question,
-		acceptedAnswer: {
-			'@type': 'Answer',
-			text: f.answer
+	onMount(async () => {
+		try {
+			faqs = await list<FAQ>('faqs');
+		} catch {
+			faqs = [];
+		} finally {
+			loadingFaqs = false;
 		}
-	}))
-};
-const faqScript = `<script type="application/ld+json">${JSON.stringify(faqSchema)}</` + `script>`;
+	});
 
-let openIndex: number | null = null;
+	const faqSchema = $derived({
+		'@context': 'https://schema.org',
+		'@type': 'FAQPage',
+		mainEntity: faqs.map((f) => ({
+			'@type': 'Question',
+			name: f.question,
+			acceptedAnswer: {
+				'@type': 'Answer',
+				text: f.answer
+			}
+		}))
+	});
+	const faqScript = $derived(
+		`<script type="application/ld+json">${JSON.stringify(faqSchema)}</` + `script>`
+	);
 
-function toggle(index: number) {
-	openIndex = openIndex === index ? null : index;
-}
-
+	function toggle(index: number) {
+		openIndex = openIndex === index ? null : index;
+	}
 </script>
 
 <svelte:head>
@@ -181,33 +166,37 @@ function toggle(index: number) {
 	</h2>
 
 	<div class="mt-10 space-y-4">
+		{#if loadingFaqs}
+			<p class="py-6 text-sm text-text-muted">Loading frequently asked questions...</p>
+		{:else if faqs.length === 0}
+			<p class="py-6 text-sm text-text-muted">{STRINGS.FAQS_EMPTY}</p>
+		{:else}
+			{#each faqs as faq, index}
+				<div class="border border-border rounded-lg overflow-hidden">
 
-		{#each faqs as faq, index}
-			<div class="border border-border rounded-lg overflow-hidden">
+					<button
+						type="button"
+						onclick={() => toggle(index)}
+						class="w-full text-left p-6 flex justify-between items-center bg-surface hover:bg-background transition"
+					>
+						<span class="font-medium text-primary">
+							{faq.question}
+						</span>
 
-				<button
-					type="button"
-					on:click={() => toggle(index)}
-					class="w-full text-left p-6 flex justify-between items-center bg-surface hover:bg-background transition"
-				>
-					<span class="font-medium text-primary">
-						{faq.question}
-					</span>
+						<span class="text-primary">
+							{openIndex === index ? "−" : "+"}
+						</span>
+					</button>
 
-					<span class="text-primary">
-						{openIndex === index ? "−" : "+"}
-					</span>
-				</button>
+					{#if openIndex === index}
+						<div class="px-6 pb-6 text-text-muted leading-relaxed text-sm prose-content">
+							{@html faq.answer}
+						</div>
+					{/if}
 
-				{#if openIndex === index}
-					<div class="px-6 pb-6 text-text-muted leading-relaxed text-sm">
-						{faq.answer}
-					</div>
-				{/if}
-
-			</div>
-		{/each}
-
+				</div>
+			{/each}
+		{/if}
 	</div>
 
 </div>
